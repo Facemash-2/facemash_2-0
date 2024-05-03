@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hot or Not Voting</title>
+    <!-- Google Fonts for styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- CSS file for custom styling -->
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- JavaScript for interactive logic -->
+    <script>
+       
+
+        // Function to sort an array of vote objects by the 'count' field in descending order
+        function sortVotesDescending(votes) {
+            return votes.sort((a, b) => b.count - a.count);
+        }
+
+        // Function to get a random pair for voting
+        function getRandomPair() {
+  fetch('/get_random_pair')
+      .then(response => response.json())
+      .then(data => {
+          const leftPerson = document.getElementById('left-person');
+          const rightPerson = document.getElementById('right-person');
+
+          leftPerson.innerHTML = `
+              <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
+              <button onclick="voteFor('${data[0]._id}')" class="vote-button">Vote for ${data[0].name}</button>
+          `;
+
+          rightPerson.innerHTML = `
+              <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
+              <button onclick="voteFor('${data[1]._id}')" class="vote-button">Vote for ${data[1].name}</button>
+          `;
+      });
+}
+
+        // Function to record a vote and get a new random pair
+        function voteFor(selected_id) {
+            fetch('/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selected_id: selected_id })
+            }).then(() => {
+                getRandomPair();  // Fetch a new pair after voting
+            });
+        }
+
+        // Function to update the leaderboard
+        function updateVotes() {
+    fetch('/get_leaderboard')  // Retrieve sorted leaderboard with likeability
+        .then(response => response.json())
+        .then(data => {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = '';  // Clear existing content
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const positionCell = document.createElement('td');
+                const nameCell = document.createElement('td');
+                const countCell = document.createElement('td');
+                const scoreCell = document.createElement('td');
+                const likeabilityCell = document.createElement('td');  // New column for likeability percentage
+
+                positionCell.innerText = index + 1;
+                nameCell.innerText = item.name;
+                countCell.innerText = item.count;
+                scoreCell.innerText = item.score;
+                likeabilityCell.innerText = item.likeability.toFixed(2) + "%";  // Show as percentage with 2 decimal places
+
+                row.appendChild(positionCell);
+                row.appendChild(nameCell);
+                row.appendChild(countCell);
+                row.appendChild(likeabilityCell);  // Add likeability column
+
+                leaderboard.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching leaderboard:", error);
+        });
+}
+
+        window.onload = function() {
+            getRandomPair();  // Display the initial pair on page load
+            updateVotes();  // Fetch and update the leaderboard
+            setInterval(updateVotes, 1000);  // Refresh the leaderboard every 5 seconds
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Hot or Not</h1>
+        <p>vote for the person you find hotter below</p>
+
+        <!-- Section for displaying two candidates for voting -->
+        <div class="vote-pair">
+            <div id="left-person" class="vote-section">
+                <!-- Content is dynamically inserted here -->
+            </div>
+
+            <div id="right-person" class="vote-section">
+                <!-- Content is dynamically inserted here -->
+            </div>
+        </div>
+
+        <h2>Leaderboard</h2>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Votes</th>
+                    <th>Likeability</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard">
+                <!-- Dynamic content will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
