@@ -17,23 +17,26 @@
 
         // Function to get a random pair for voting
         function getRandomPair() {
-  fetch('/get_random_pair')
-      .then(response => response.json())
-      .then(data => {
-          const leftPerson = document.getElementById('left-person');
-          const rightPerson = document.getElementById('right-person');
+    fetch('/get_random_pair')
+        .then(response => response.json())
+        .then(data => {
+            const leftPerson = document.getElementById('left-person');
+            const rightPerson = document.getElementById('right-person');
 
-          leftPerson.innerHTML = `
-              <img onclick="voteFor('${data[0]._id}')" src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
-              <button onclick="voteFor('${data[0]._id}')" class="vote-button">Vote for ${data[0].name}</button>
-          `;
+            leftPerson.innerHTML = `
+                <img src="/static/images/${data[0].name.toLowerCase().replace(/\s/g, '_')}.jpg"
+                    alt="${data[0].name}" class="person-image"
+                    onclick="voteFor('${data[0]._id}')">
+            `;
 
-          rightPerson.innerHTML = `
-              <img onclick="voteFor('${data[1]._id}')" src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
-              <button onclick="voteFor('${data[1]._id}')" class="vote-button">Vote for ${data[1].name}</button>
-          `;
-      });
+            rightPerson.innerHTML = `
+                <img src="/static/images/${data[1].name.toLowerCase().replace(/\s/g, '_')}.jpg"
+                    alt="${data[1].name}" class="person-image"
+                    onclick="voteFor('${data[1]._id}')">
+            `;
+        });
 }
+
 
         // Function to record a vote and get a new random pair
         function voteFor(selected_id) {
