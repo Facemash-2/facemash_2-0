@@ -24,14 +24,14 @@ function getRandomPair() {
             const rightPerson = document.getElementById('right-person');
 
             leftPerson.innerHTML = `
-                <img src="/static/images/${data.first.name.toLowerCase()}.jpg" alt="${data.first.name}"
+                <img loading="lazy" src="/static/images/${data.first.name.toLowerCase()}.jpg" alt="${data.first.name}"
                     class="person-image"
                     onclick="voteFor('${data.first._id}')">  <!-- Use the ObjectId as the parameter -->
                 <h3>${data.first.name.toLowerCase()}</h3>
             `;
 
             rightPerson.innerHTML = `
-                <img src="/static/images/${data.second.name.toLowerCase()}.jpg" alt="${data.second.name}"
+                <img loading="lazy" src="/static/images/${data.second.name.toLowerCase()}.jpg" alt="${data.second.name}"
                     class="person-image"
                     onclick="voteFor('${data.second._id}')">  <!-- Use the ObjectId as the parameter -->
                 <h3>${data.second.name.toLowerCase()}</h3>
