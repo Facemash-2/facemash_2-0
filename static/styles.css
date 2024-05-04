@@ -80,8 +80,9 @@ body {
 
 /* Header styling */
 h1 {
-    color: #333;
+    color: #fff;
     font-weight: 700;
+    background-color: red;
 }
 
 h3 {
