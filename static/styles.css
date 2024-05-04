@@ -20,6 +20,25 @@ body {
     background-color: white;
 }
 
+.top-candidate {
+    background-color: gold;  // Gold background for 1st place
+    font-weight: bold;
+}
+
+.second-candidate {
+    background-color: silver;  // Silver background for 2nd place
+    font-weight: bold;
+}
+
+.third-candidate {
+    background-color: #cd7f32;  // Bronze-like background for 3rd place
+    font-weight: bold;
+}
+
+.top-candidate td, .second-candidate td, .third-candidate td {
+    color: #333;  // Darker text for contrast
+}
+
 /* Flexbox layout for horizontal alignment of the vote-pair */
 .vote-pair {
     display: flex;
