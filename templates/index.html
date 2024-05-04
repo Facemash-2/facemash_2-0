@@ -24,15 +24,13 @@
             const rightPerson = document.getElementById('right-person');
 
             leftPerson.innerHTML = `
-                <img src="/static/images/${data[0].name.toLowerCase().replace(/\s/g, '_')}.jpg"
-                    alt="${data[0].name}" 
+                <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" 
                     class="person-image"
                     onclick="voteFor('${data[0]._id}')">  <!-- Use the ObjectId as the parameter -->
             `;
 
             rightPerson.innerHTML = `
-                <img src="/static/images/${data[1].name.toLowerCase().replace(/\s/g, '_')}.jpg"
-                    alt="${data[1].name}" 
+                <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" 
                     class="person-image"
                     onclick="voteFor('${data[1]._id}')">  <!-- Use the ObjectId as the parameter -->
             `;
