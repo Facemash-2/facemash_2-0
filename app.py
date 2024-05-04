@@ -57,7 +57,7 @@ def get_random_pair():
 
     # Store the new pair as the last pair
     last_pair = new_pair
-   random_pair = new_pair
+    random_pair = new_pair
 
     return jsonify(convert_to_json_compatible(random_pair))
 
