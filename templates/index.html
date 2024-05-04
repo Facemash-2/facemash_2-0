@@ -9,47 +9,49 @@
     <link rel="stylesheet" href="/static/styles.css">
     <!-- JavaScript for interactive logic -->
     <script>
-        // Fetch a random pair from the backend
-        function getRandomPair() {
-            fetch('/get_random_pair')
-                .then(response => response.json())
-                .then(data => {
-                    const leftPerson = document.getElementById('left-person');
-                    const rightPerson = document.getElementById('right-person');
+       
 
-                    leftPerson.innerHTML = `
-                        <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
-                        <button onclick="voteFor('${data[0]._id}')" class="vote-button">Vote for ${data[0].name}</button>
-                    `;
-
-                    rightPerson.innerHTML = `
-                        <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
-                        <button onclick="voteFor('${data[1]._id}')" class="vote-button">Vote for ${data[1].name}</button>
-                    `;
-                });
+        // Function to sort an array of vote objects by the 'count' field in descending order
+        function sortVotesDescending(votes) {
+            return votes.sort((a, b) => b.count - a.count);
         }
 
-        // Send voting data with names instead of IDs
-        function voteFor(selected_id, rejected_id) {
-    console.log("Data being sent to /vote:", { selected_id, rejected_id });  // Debug output
+        // Function to get a random pair for voting
+        function getRandomPair() {
+  fetch('/get_random_pair')
+      .then(response => response.json())
+      .then(data => {
+          const leftPerson = document.getElementById('left-person');
+          const rightPerson = document.getElementById('right-person');
 
-    fetch('/vote', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ selected_id, rejected_id })  // Ensure correct variable names
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Response from server:", data);
-        getRandomPair();  // Fetch a new pair after voting
-    })
-    .catch(error => console.error("Error during voting:", error));
+          leftPerson.innerHTML = `
+              <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
+              <button onclick="voteFor('${data[0]._id}')" class="vote-button">Vote for ${data[0].name}</button>
+          `;
+
+          rightPerson.innerHTML = `
+              <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
+              <button onclick="voteFor('${data[1]._id}')" class="vote-button">Vote for ${data[1].name}</button>
+          `;
+      });
 }
-        // Fetch and update the leaderboard
-function updateLeaderboard() {
-    fetch('/get_leaderboard')
+
+        // Function to record a vote and get a new random pair
+        function voteFor(selected_id) {
+            fetch('/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selected_id: selected_id })
+            }).then(() => {
+                getRandomPair();  // Fetch a new pair after voting
+            });
+        }
+
+        // Function to update the leaderboard
+        function updateVotes() {
+    fetch('/get_leaderboard')  // Retrieve sorted leaderboard with likeability
         .then(response => response.json())
         .then(data => {
             const leaderboard = document.getElementById('leaderboard');
@@ -57,38 +59,35 @@ function updateLeaderboard() {
 
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
-
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
                 const countCell = document.createElement('td');
                 const scoreCell = document.createElement('td');
-                const likeabilityCell = document.createElement('td');  // New cell for likeability
+                const likeabilityCell = document.createElement('td');  // New column for likeability percentage
 
-                // Safely get the likeability value, or set a default if undefined
-                const likeability = item.likeability !== undefined ? item.likeability : 0;
+                positionCell.innerText = index + 1;
+                nameCell.innerText = item.name;
+                countCell.innerText = item.count;
+                scoreCell.innerText = item.score;
+                likeabilityCell.innerText = item.likeability.toFixed(2) + "%";  // Show as percentage with 2 decimal places
 
-                positionCell.innerText = index + 1;  // Position in the leaderboard
-                nameCell.innerText = item.name;  // Candidate's name
-                countCell.innerText = item.count;  // Vote count
-                scoreCell.innerText = item.score;  // Score
-                likeabilityCell.innerText = likeability.toFixed(2) + "%";  // Handle missing likeability
-
-                row.appendChild(positionCell);  // Append cells to the row
+                row.appendChild(positionCell);
                 row.appendChild(nameCell);
                 row.appendChild(countCell);
-                row.appendChild(likeabilityCell);  // Append likeability
+                row.appendChild(likeabilityCell);  // Add likeability column
 
-                leaderboard.appendChild(row);  // Append the row to the leaderboard
+                leaderboard.appendChild(row);
             });
         })
-        .catch(error => console.error("Error updating leaderboard:", error));
+        .catch(error => {
+            console.error("Error fetching leaderboard:", error);
+        });
 }
 
-        // On page load, fetch the initial random pair and update the leaderboard
         window.onload = function() {
-            getRandomPair();  // Get initial random pair
-            updateLeaderboard();  // Update the leaderboard
-            setInterval(updateLeaderboard, 5000);  // Refresh every 5 seconds
+            getRandomPair();  // Display the initial pair on page load
+            updateVotes();  // Fetch and update the leaderboard
+            setInterval(updateVotes, 1000);  // Refresh the leaderboard every 5 seconds
         };
     </script>
 </head>
