@@ -69,7 +69,7 @@
 
         // Function to update the leaderboard
         function updateVotes() {
-    fetch('/get_leaderboard')  // Retrieve sorted leaderboard with likeability
+    fetch('/get_leaderboard')  // Fetch the leaderboard
         .then(response => response.json())
         .then(data => {
             const leaderboard = document.getElementById('leaderboard');
@@ -79,21 +79,17 @@
                 const row = document.createElement('tr');
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
-                const countCell = document.createElement('td');
                 const scoreCell = document.createElement('td');
-                const likeabilityCell = document.createElement('td');  // New column for likeability percentage
 
-                positionCell.innerText = index + 1;
-                nameCell.innerText = item.name;
-                countCell.innerText = item.count;
-                scoreCell.innerText = item.score;
-                likeabilityCell.innerText = item.likeability.toFixed(2) + "%";  // Show as percentage with 2 decimal places
+                positionCell.innerText = index + 1;  // Display rank
+                nameCell.innerText = item.name;  // Display candidate's name
+                scoreCell.innerText = item.score.toFixed(2);  // Display the Elo score
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
-                row.appendChild(likeabilityCell);  // Add likeability column
+                row.appendChild(scoreCell);
 
-                leaderboard.appendChild(row);
+                leaderboard.appendChild(row);  // Append to the leaderboard
             });
         })
         .catch(error => {
