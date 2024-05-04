@@ -52,55 +52,49 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    data = request.get_json()
-    selected_id = data.get("selected_id")
-    rejected_id = data.get("rejected_id")
+    try:
+        data = request.get_json()  # Retrieve JSON data from the POST request
+        selected_id = data.get("selected_id")
 
-    if not selected_id:
-        return jsonify({"status": "error", "message": "Invalid ID"}), 400
+        if not selected_id:
+            return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Return error for invalid ID
 
-    # Find the candidate who was voted for
-    voted_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
+        candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
+        
+        if not candidate_voted_for:
+            return jsonify({"status": "error", "message": "Candidate not found"}), 404  # Handle invalid candidate
 
-    if not voted_candidate:
-        return jsonify({"status": "error", "message": "Candidate not found"}), 404
+        # Randomly select another candidate (excluding the voted candidate)
+        all_candidates = list(mongo.db.votes.find())
+        other_candidate = random.choice([c for c in all_candidates if str(c["_id"]) != selected_id])
 
-    # Find all other candidates excluding the voted candidate
-    all_candidates = list(mongo.db.votes.find({"_id": {"$ne": ObjectId(selected_id)}}))
-    
-    if not all_candidates:
-        return jsonify({"status": "error", "message": "No other candidates to compare against"}), 400
-    
-    other_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})  # Choose another candidate randomly
+        if not other_candidate:
+            return jsonify({"status": "error", "message": "No valid candidate to compare against"}), 500  # Check for valid other candidate
 
-    # Cross-check that the name and ID match to prevent errors
-    if "name" not in voted_candidate:
-        return jsonify({"status": "error", "message": "Candidate name is missing"}), 500
-    
-    # Ensure the name and ID are consistent
-    name = data.get("name").strip().lower()
-    if voted_candidate["name"].strip().lower() != name:
-        return jsonify({"status": "error", "message": "Mismatch between name and ID"}), 400
+        # Calculate Elo expected outcomes
+        expected_voted = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
+        score_increment = K_FACTOR * (1 - expected_voted)  # Increment for voted-for candidate
+        score_decrement = K_FACTOR * expected_voted  # Decrement for other candidate
 
-    # Elo score adjustments
-    expected_voted = 1 / (1 + 10 ** ((other_candidate["score"] - voted_candidate["score"]) / 400))
-    expected_other = 1 - expected_voted
+        # Update scores
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(selected_id)},
+            {"$inc": {"score": score_increment}}
+        )
+        
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(other_candidate["_id"])},
+            {"$inc": {"score": score_decrement}}
+        )
 
-    score_increment = K_FACTOR * (1 - expected_voted)  # Increase for the voted candidate
-    score_decrement = K_FACTOR * (expected_other)  # Decrease for the other candidate
+        return jsonify({"status": "success"})
 
-    # Update scores
-    mongo.db.votes.update_one(
-        {"_id": ObjectId(selected_id)},
-        {"$inc": {"score": score_increment}}
-    )
+    except Exception as e:
+        # Log the error for debugging
+        app.logger.error(f"Error in /vote endpoint: {e}")
+        # Return a 500 status with a descriptive message
+        return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
 
-    mongo.db.votes.update_one(
-        {"_id": ObjectId(other_candidate)},
-        {"$inc": {"score": score_decrement}}
-    )
-
-    return jsonify({"status": "success"})
 @app.route('/')
 def index():
     return render_template('index.html')
