@@ -29,7 +29,7 @@ body {
 
 /* Style for the person images */
 .person-image {
-    width: 80%;  /* Flexible width */
+    width: 50%;  /* Flexible width */
     height: auto;  /* Maintain aspect ratio */
     border-radius: 50%;
     object-fit: cover;
