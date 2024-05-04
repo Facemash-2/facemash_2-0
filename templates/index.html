@@ -69,7 +69,7 @@
 
         // Function to update the leaderboard
         function updateVotes() {
-    fetch('/get_leaderboard')  // Fetch the leaderboard
+    fetch('/get_leaderboard')  // Fetch the leaderboard data
         .then(response => response.json())
         .then(data => {
             const leaderboard = document.getElementById('leaderboard');
@@ -77,16 +77,28 @@
 
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
+
+                if (index === 0) {  // Top person on the leaderboard
+                    row.classList.add('top-candidate');  // Apply a special class for styling
+                }
+
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
                 const scoreCell = document.createElement('td');
 
-                positionCell.innerText = index + 1;  // Display rank
-                nameCell.innerText = item.name;  // Display candidate's name
-                scoreCell.innerText = item.score.toFixed(2);  // Display the Elo score
+                positionCell.innerText = index + 1;  // Rank
+                nameCell.innerText = item.name;  // Candidate's name
+
+                if (index === 0) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🏅 ' + item.name;  // Gold medallion emoji
+                }
+
+                scoreCell.innerText = item.score.toFixed(2);  // Elo score
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
+                row.appendChild(scoreCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
