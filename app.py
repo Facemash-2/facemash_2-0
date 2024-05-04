@@ -59,48 +59,45 @@ def get_random_pair():
         "second": convert_to_json_compatible(second_candidate),
     })
 
+
 @app.route('/vote', methods=['POST'])
 def vote():
     data = request.get_json()
+
+    # Retrieve selected and rejected IDs
     selected_id = data.get("selected_id")
+    rejected_id = data.get("rejected_id")
 
-    if not selected_id:
-        return jsonify({"status": "error", "message": "Invalid ID"}), 400
+    if not selected_id or not rejected_id:
+        return jsonify({"status": "error", "message": "Invalid ID(s)"}), 400
 
-    # Find the candidate who was voted for
+    # Find the voted candidate
     voted_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
-
     if not voted_candidate:
-        return jsonify({"status": "error", "message": "Candidate not found"}), 404
+        return jsonify({"status": "error", "message": "Selected candidate not found"}), 404
 
-    # Retrieve all other candidates excluding the voted candidate
-    all_candidates = list(mongo.db.votes.find({"_id": {"$ne": ObjectId(selected_id)}}))
-    
-    if not all_candidates:
-        return jsonify({"status": "error", "message": "No other candidates to compare against"}), 400
-    
-    other_candidate = random.choice(all_candidates)  # Choose another candidate randomly
+    # Find the rejected candidate
+    rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
+    if not rejected_candidate:
+        return jsonify({"status": "error", "message": "Rejected candidate not found"}), 404
 
-    # Cross-check the name before updating scores
-    if voted_candidate["name"].lower() != data.get("name").lower():
-        return jsonify({"status": "error", "message": "Mismatch between name and ID"}), 400
+    # Calculate expected outcomes for Elo
+    expected_voted = calculate_expected_outcome(voted_candidate["score"], rejected_candidate["score"])
+    expected_rejected = 1 - expected_voted
 
-    # Expected outcomes and score changes for Elo
-    expected_voted = 1 / (1 + 10 ** ((other_candidate["score"] - voted_candidate["score"]) / 400))
-    increment = K_FACTOR * (1 - expected_voted)
-    
-    expected_other = 1 - expected_voted
-    decrement = K_FACTOR * expected_other
-    
-    # Update the scores
+    # Calculate score changes
+    score_increment = K_FACTOR * (1 - expected_voted)  # Score change for the selected candidate
+    score_decrement = K_FACTOR * expected_rejected  # Score change for the rejected candidate
+
+    # Update scores
     mongo.db.votes.update_one(
         {"_id": ObjectId(selected_id)},
-        {"$inc": {"score": increment}}
+        {"$inc": {"score": score_increment}}
     )
-    
+
     mongo.db.votes.update_one(
-        {"_id": ObjectId(other_candidate["_id"])},
-        {"$inc": {"score": decrement}}
+        {"_id": ObjectId(rejected_id)},
+        {"$inc": {"score": score_decrement}}
     )
 
     return jsonify({"status": "success"})
