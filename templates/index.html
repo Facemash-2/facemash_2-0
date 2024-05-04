@@ -28,6 +28,7 @@
                              alt="${data[0].name}" 
                              class="person-image" 
                              onclick="voteFor('${data[0].name}', '${data[1].name}')" />  <!-- Clickable image -->
+                             <h1>${data[0].name.toLowerCase()}</h1>
                     `;
 
                     rightPerson.innerHTML = `
@@ -35,6 +36,7 @@
                              alt="${data[1].name}" 
                              class="person-image" 
                              onclick="voteFor('${data[1].name}', '${data[0].name}')" />  <!-- Clickable image -->
+                             <h1>${data[1].name.toLowerCase()}</h1>
                     `;
                 })
                 .catch(error => console.error("Error fetching random pair:", error));
