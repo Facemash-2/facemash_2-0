@@ -36,6 +36,11 @@ body {
     border-radius: 50%;
     object-fit: cover;  /* Maintain aspect ratio */
     margin-bottom: 10px;  /* Spacing between image and button */
+    cursor: pointer;
+}
+
+.person-image:hover {
+    transform: scale(1.1);  /* Optional hover effect (slightly enlarge) */
 }
 
 
