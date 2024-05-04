@@ -24,12 +24,12 @@
           const rightPerson = document.getElementById('right-person');
 
           leftPerson.innerHTML = `
-              <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
+              <img onclick="voteFor('${data[0]._id}')" src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" class="person-image">
               <button onclick="voteFor('${data[0]._id}')" class="vote-button">Vote for ${data[0].name}</button>
           `;
 
           rightPerson.innerHTML = `
-              <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
+              <img onclick="voteFor('${data[1]._id}')" src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" class="person-image">
               <button onclick="voteFor('${data[1]._id}')" class="vote-button">Vote for ${data[1].name}</button>
           `;
       });
