@@ -1,75 +1,103 @@
 from flask import Flask, render_template, request, jsonify
-import firebase_admin
-from firebase_admin import credentials, firestore
+from flask_pymongo import PyMongo
+from bson import ObjectId
 import random
 
-# Initialize Flask
 app = Flask(__name__)
 
-# Initialize Firebase Admin with the service account key
-cred = credentials.Certificate("static/key.json")
-firebase_admin.initialize_app(cred)
+# MongoDB connection string (update with your own if needed)
+app.config["MONGO_URI"] = "mongodb+srv://ppgame793:CBrHkNaLAPln7GeK@hotornot.gubbic6.mongodb.net/voting_app?retryWrites=true&w=majority&appName=hotornot"
+mongo = PyMongo(app)
 
-# Initialize Firestore
-db = firestore.client()
+def convert_to_json_compatible(data):
+    if isinstance(data, ObjectId):
+        return str(data)  # Convert ObjectId to string
+    if isinstance(data, dict):
+        return {k: convert_to_json_compatible(v) for k, v in data.items()}
+    if isinstance(data, list):
+        return [convert_to_json_compatible(i) for i in data]
+    return data
+
 # Ensure initial candidates have a score of 100000
-initial_candidates = ["test","jhalak patel","pankhudi bajaj","mannat kaur","stuti dubey","priyali trivedi","avanika soni","mahi modi","aastha didwania","presha lamba","himanshi sahu","yukta jangde","lavisha choudhary","niyatee vijaywargiya","snigdha thakur","shreya mishra","soumyata solanki"]
-# Ensure initial candidates are in Firestore
-for candidate in initial_candidates:
-    doc_ref = db.collection("votes").document(candidate)
-    if not doc_ref.get().exists:
-        doc_ref.set({"id":len(initial_candidates)+1,"name": candidate, "count": 0, "score": 1000})  # Initial score of 1000
-
-@app.route('/')
-def index():
-    return render_template('index.html')
+initial_votes = ["jhalak patel","pankhudi bajaj","mannat kaur","stuti dubey","priyali trivedi","avanika soni","mahi modi","aastha didwania","presha lamba","himanshi sahu","yukta jangde","lavisha choudhary","niyatee vijaywargiya","snigdha thakur","shreya mishra","soumyata solanki"]
+for candidate in initial_votes:
+    if not mongo.db.votes.find_one({"name": candidate}):
+        mongo.db.votes.insert_one({"name": candidate, "count": 0, "score": 1000})
+    else:
+        # If the candidate exists but doesn't have a score, initialize it
+        mongo.db.votes.update_one(
+            {"name": candidate, "score": {"$exists": False}},
+            {"$set": {"score": 1000}}
+        )
 
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
-    all_candidates = list(db.collection("votes").stream())
-    random_pair = random.sample(all_candidates, 2)
-    return jsonify([doc.to_dict() for doc in random_pair])
-
+    all_candidates = list(mongo.db.votes.find())
+    random_pair = random.sample(all_candidates, 2)  # Select two random candidates
+    return jsonify(convert_to_json_compatible(random_pair))
 
 @app.route('/vote', methods=['POST'])
 def vote():
     data = request.get_json()
     selected_id = data.get("selected_id")
-    rejected_id = data.get("rejected_id")
 
-    if selected_id and rejected_id:
-        selected_ref = db.collection("votes").document(selected_id)
-        rejected_ref = db.collection("votes").document(rejected_id)
+    if not selected_id:
+        return jsonify({"status": "error", "message": "Invalid ID"}), 400
 
-        # Update count and score for selected and rejected
-        selected_ref.update({"count": firestore.Increment(1), "score": firestore.Increment(1)})
-        rejected_ref.update({"score": firestore.Increment(-1)})
+    all_candidates = list(mongo.db.votes.find())
+    candidate_voted_for = next((c for c in all_candidates if str(c["_id"]) == selected_id), None)
 
-        return jsonify({"status": "success"})
-    else:
-        return jsonify({"status": "error", "message": "Invalid IDs"}), 400
+    if not candidate_voted_for:
+        return jsonify({"status": "error", "message": "Candidate not found"}), 404
+
+    other_candidate = random.choice([c for c in all_candidates if c["_id"] != candidate_voted_for["_id"]])
+
+    # Increment score for the candidate who received the vote
+    mongo.db.votes.update_one(
+        {"_id": ObjectId(selected_id)},
+        {"$inc": {"count": 1, "score": 1}}
+    )
+
+    # Decrement score for the other candidate
+    mongo.db.votes.update_one(
+        {"_id": ObjectId(other_candidate["_id"])},
+        {"$inc": {"score": -1}}
+    )
+
+    return jsonify({"status": "success"})
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
-    # Get all documents from the "votes" collection
-    all_candidates = list(db.collection("votes").stream())
+    # Fetch all candidates
+    all_candidates = list(mongo.db.votes.find())
     
-    # Find the maximum score among all candidates
-    max_score = max([doc.to_dict()['score'] for doc in all_candidates])
-
-    # Create the leaderboard with percentage calculations
-    leaderboard = []
+    # Calculate the total score for calculating likeability percentages
+    total_score = sum(candidate["score"] for candidate in all_candidates)
+    
+    # Add likeability percentage to each candidate
     for candidate in all_candidates:
-        candidate_data = candidate.to_dict()
-        
-        # Calculate the percentage based on the max score
-        if max_score > 0:
-            candidate_data['percentage'] = (candidate_data['score'] / max_score) * 100
+        if total_score > 0:
+            candidate["likeability"] = (candidate["score"] / total_score) * 100
         else:
-            candidate_data['percentage'] = 0  # Handle case where max score is non-positive
+            candidate["likeability"] = 0
+    
+    # Sort candidates by score in descending order
+    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
+    
+    # Return the sorted candidates with JSON compatibility
+    return jsonify(convert_to_json_compatible(sorted_candidates))
 
-        leaderboard.append(candidate_data)
+@app.route('/get_votes', methods=['GET'])
+def get_votes():
+    # Retrieve all documents from the "votes" collection
+    votes = list(mongo.db.votes.find())
+    # Convert MongoDB data to a JSON-compatible format
+    votes_json = convert_to_json_compatible(votes)
+    return jsonify(votes_json)
 
-    return jsonify(leaderboard)
 if __name__ == '__main__':
     app.run(debug=True)
