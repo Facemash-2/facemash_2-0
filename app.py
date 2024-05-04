@@ -44,42 +44,34 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    data = request.get_json()
-    selected_id = data.get("selected_id")
+    data = request.get_json()  # Retrieve JSON data from the request
+    selected_id = data.get("selected_id")  # Get the selected candidate's ID
 
     if not selected_id:
         return jsonify({"status": "error", "message": "Invalid ID"}), 400
 
-    all_candidates = list(mongo.db.votes.find())
-    candidate_voted_for = next((c for c in all_candidates if str(c["_id"]) == selected_id), None)
-
-    if not candidate_voted_for:
-        return jsonify({"status": "error", "message": "Candidate not found"}), 404
-
-    # Randomly choose the other candidate
-    other_candidate = random.choice([c for c in all_candidates if c["_id"] != candidate_voted_for["_id"]])
-
-    # Calculate expected outcomes
-    expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
-    expected_other = 1 - expected_voted_for
-
-    # Increment the count and adjust the scores based on Elo logic
     try:
-        # Update for candidate voted for
-        mongo.db.votes.update_one(
-            {"_id": ObjectId(candidate_voted_for["_id"])},
-            {"$inc": {"count": 1, "score": K_FACTOR * (1 - expected_voted_for)}}
-        )
+        candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
-        # Update for other candidate
+        if not candidate_voted_for:
+            return jsonify({"status": "error", "message": "Candidate not found"}), 404
+
+        # Increment the count and adjust the score based on Elo logic
+        expected_outcome = calculate_expected_outcome(candidate_voted_for["score"], 100000)  # Calculate expected outcome
+        increment_value = 1 - expected_outcome  # Outcome if the candidate is chosen
+
+        # Update the count and score
         mongo.db.votes.update_one(
-            {"_id": ObjectId(other_candidate["_id"])},
-            {"$inc": {"score": K_FACTOR * (-expected_other)}}
+            {"_id": ObjectId(selected_id)},
+            {
+                "$inc": {"count": 1, "score": 32 * increment_value}
+            }
         )
 
         return jsonify({"status": "success"})
-    except pymongo.errors.PyMongoError as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500  # Catch errors and return a proper response
 
 @app.route('/')
 def index():
