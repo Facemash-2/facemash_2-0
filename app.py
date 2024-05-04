@@ -3,8 +3,10 @@ from flask_pymongo import PyMongo
 from bson import ObjectId
 import random
 from math import pow
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 K_FACTOR = 32
 
 # MongoDB connection string (update with your own if needed)
