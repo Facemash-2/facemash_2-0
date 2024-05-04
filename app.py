@@ -71,7 +71,7 @@ def vote():
     if not all_candidates:
         return jsonify({"status": "error", "message": "No other candidates to compare against"}), 400
     
-    other_candidate = rejected_id  # Choose another candidate randomly
+    other_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})  # Choose another candidate randomly
 
     # Cross-check that the name and ID match to prevent errors
     if "name" not in voted_candidate:
