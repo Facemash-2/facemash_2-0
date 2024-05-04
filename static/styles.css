@@ -92,7 +92,7 @@ h2 {
     justify-content: space-between;
 }
 .banner {
-    max-width: 200px;
+    max-width: 250px;
 }
 /* Media query for smaller screens */
 @media (max-width: 600px) {
@@ -114,7 +114,14 @@ h2 {
         object-fit: cover;  /* Maintain aspect ratio */
         margin-bottom: 10px;  /* Spacing between image and button */
     }
-    .banner {
-        max_width:40px;
+}
+
+@media (max-width: 501px) {
+    .banner{
+        max-width:180px;
+        padding-bottom:50px;
+    }
+    .vote-button {
+        max-width:100px;
     }
 }
