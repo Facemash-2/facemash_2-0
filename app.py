@@ -36,24 +36,37 @@ for candidate in initial_votes:
             {"$set": {"score": 1000}}
         )
 
+last_pair = None  # This will keep track of the last random pair
+
+def get_random_pair_without_repeat(all_candidates, last_pair):
+    # Randomly select the first candidate, ensuring it's not in the last pair
+    first_candidate = random.choice(all_candidates)
+    while last_pair and first_candidate["_id"] in [c["_id"] for c in last_pair]:
+        first_candidate = random.choice(all_candidates)
+
+    # Randomly select the second candidate, ensuring it's not in the last pair and not the same as the first candidate
+    second_candidate = random.choice(all_candidates)
+    while second_candidate["_id"] == first_candidate["_id"] or (last_pair and second_candidate["_id"] in [c["_id"] for c in last_pair]):
+        second_candidate = random.choice(all_candidates)
+
+    return [first_candidate, second_candidate]
+
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
+    global last_pair
+
     # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
 
-    # Randomly select the first candidate
-    first_candidate = random.choice(all_candidates)
+    # Get a random pair without repeating any candidate from the last pair
+    random_pair = get_random_pair_without_repeat(all_candidates, last_pair)
 
-    # Randomly select the second candidate, ensuring it's different from the first
-    second_candidate = random.choice(all_candidates)
-    while second_candidate == first_candidate:  # Ensure different candidates
-        second_candidate = random.choice(all_candidates)
-
-    random_pair = [first_candidate, second_candidate]
+    # Update the last pair with the new random pair
+    last_pair = random_pair
 
     return jsonify({
-        "first": convert_to_json_compatible(first_candidate),
-        "second": convert_to_json_compatible(second_candidate),
+        "first": convert_to_json_compatible(random_pair[0]),
+        "second": convert_to_json_compatible(random_pair[1]),
     })
 
 @app.route('/vote', methods=['POST'])
