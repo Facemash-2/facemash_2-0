@@ -37,21 +37,27 @@ for candidate in initial_votes:
             {"name": candidate, "score": {"$exists": False}},
             {"$set": {"score": 1000}}
         )
-
-last_pair = None  # Track the last pair to prevent repetition
+  # Track the last pair to prevent repetition
 
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
-    global last_pair
+    # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
-    if len(all_candidates) < 2:
-        return jsonify({"error": "Not enough candidates"}), 400
 
-    # Generate a random pair avoiding candidates from the last pair
-    new_pair = random.sample(all_candidates, 2)
-    last_pair = new_pair  # Update the last drawn pair
+    # Randomly select the first candidate
+    first_candidate = random.choice(all_candidates)
 
-    return jsonify([new_pair[0], new_pair[1]])
+    # Randomly select the second candidate, ensuring it's different from the first
+    second_candidate = random.choice(all_candidates)
+    while second_candidate == first_candidate:  # Ensure different candidates
+        second_candidate = random.choice(all_candidates)
+
+    random_pair = [first_candidate, second_candidate]
+
+    return jsonify({
+        "first": convert_to_json_compatible(first_candidate),
+        "second": convert_to_json_compatible(second_candidate),
+    })
 
 @app.route('/vote', methods=['POST'])
 def vote():
