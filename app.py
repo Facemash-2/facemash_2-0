@@ -92,18 +92,21 @@ def get_leaderboard():
     # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
     
-    # Sort candidates by their Elo scores in descending order
-    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
-    
     # Get the highest score to calculate relative likeability
-    highest_score = sorted_candidates[0]["score"]
-
-    # Add likeability percentage to each candidate
-    for candidate in sorted_candidates:
-        if highest_score == 0:
+    highest_score = max(candidate["score"] for candidate in all_candidates)  # Find the highest Elo score
+    
+    # Calculate likeability percentage and set it to 0% if count is 0
+    for candidate in all_candidates:
+        if candidate["count"] == 0:  # If no votes, likeability is 0%
+            candidate["likeability"] = 0
+        elif highest_score == 0:
             candidate["likeability"] = 0  # Avoid division by zero
         else:
+            # Calculate likeability as a percentage of the highest score
             candidate["likeability"] = (candidate["score"] / highest_score) * 100
+    
+    # Sort candidates by their Elo scores in descending order
+    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
 
     # Return the sorted candidates with JSON compatibility
     return jsonify(convert_to_json_compatible(sorted_candidates))
