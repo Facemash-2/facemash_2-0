@@ -16,8 +16,7 @@ body {
 /* Flexbox layout for horizontal alignment of the vote-pair */
 .vote-pair {
     display: flex;
-    justify-content: space-between;  
-    padding: 20px;
+    justify-content: space-between;
 }
 
 /* Vertical alignment for vote sections */
