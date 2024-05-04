@@ -24,6 +24,7 @@ body {
 /* Vertical alignment for vote sections */
 .vote-section {
     flex: 1;  /* Each section takes equal space */
+    flex-direction: column;
     margin: 10px;
     align-items: center;
 }
@@ -99,6 +100,7 @@ h2 {
 
     .vote-section {
         flex: 1;
+        flex-direction: column;
         margin: 20px 0;  /* Add margin for separation */
         align-items: center;
     }
