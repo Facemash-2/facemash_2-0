@@ -101,6 +101,6 @@ h2 {
     }
 
     .person-image {
-        width: 100%;  /* Full width on smaller screens */
+        width: 50%;  /* Full width on smaller screens */
     }
 }
