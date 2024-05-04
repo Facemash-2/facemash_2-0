@@ -47,39 +47,39 @@ function getRandomPair() {
 
        // Function to validate and send the vote
 function voteFor(selected_id) {
-    // Validate if the name displayed matches the expected ObjectId
-    const leftPersonName = document.getElementById('left-person').querySelector('h3').innerText;
-    const rightPersonName = document.getElementById('right-person').querySelector('h3').innerText;
-
-    // Cross-check the name with ObjectId
-    const correctID = false;
-    if (leftPersonName.toLowerCase() === selected_id.toLowerCase() || rightPersonName.toLowerCase() === selected_id.toLowerCase()) {
-        correctID = true;
-    }
-
-    if (correctID) {
-        fetch('/vote', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ selected_id: selected_id })
-        })
-        .then((response) => {
-            if (response.ok) {
-                getRandomPair();  // Fetch a new pair after voting
-            } else {
-                console.error("Error sending vote:", response.statusText);
-            }
-        })
-        .catch((error) => {
-            console.error("Error sending vote:", error);
-        });
+    // Determine the ID of the rejected candidate
+    const leftPerson = document.getElementById('left-person').querySelector('img');
+    const rightPerson = document.getElementById('right-person').querySelector('img');
+    
+    let rejected_id;
+    if (selected_id === leftPerson.getAttribute('data-id')) {
+        rejected_id = rightPerson.getAttribute('data-id');  // Right person is rejected
     } else {
-        console.error("Invalid vote: Mismatched ID and name.");
+        rejected_id = leftPerson.getAttribute('data-id');  // Left person is rejected
     }
-}
 
+    fetch('/vote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selected_id: selected_id, rejected_id: rejected_id })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Failed to submit vote');
+        }
+    })
+    .then(data => {
+        // Fetch a new random pair
+        getRandomPair();
+    })
+    .catch(error => {
+        console.error("Error sending vote:", error);
+    });
+}
         // Function to update the leaderboard
         function updateVotes() {
     fetch('/get_leaderboard')  // Fetch the leaderboard data
