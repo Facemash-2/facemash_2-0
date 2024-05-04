@@ -45,16 +45,27 @@
 
         // Function to record a vote and get a new random pair
         function voteFor(selected_id) {
-            fetch('/vote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ selected_id: selected_id })
-            }).then(() => {
-                getRandomPair();  // Fetch a new pair after voting
-            });
+    fetch('/vote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selected_id: selected_id })  // Send the ObjectId to the backend
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Vote failed');
         }
+    })
+    .then(() => {
+        getRandomPair();  // Fetch a new pair after voting
+    })
+    .catch(error => {
+        console.error("Error during voting:", error);
+    });
+}
 
         // Function to update the leaderboard
         function updateVotes() {
