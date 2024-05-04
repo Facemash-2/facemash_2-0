@@ -13,9 +13,13 @@ K_FACTOR = 32
 app.config["MONGO_URI"] = "mongodb+srv://ppgame793:CBrHkNaLAPln7GeK@hotornot.gubbic6.mongodb.net/voting_app?retryWrites=true&w=majority&appName=hotornot"
 mongo = PyMongo(app)
 
-def calculate_expected_outcome(rating_a, rating_b):
+def calculate_expected_outcome_selected(rating_a, rating_b):
     # Calculate the expected outcome for candidate A
     return 1 / (1 + pow(10, (rating_b - rating_a) / 400))
+    
+def calculate_expected_outcome_rejected(rating_a, rating_b):
+    # Calculate the expected outcome for candidate A
+    return 1 / (1 + pow(10, (rating_a - rating_b) / 400))
     
 def convert_to_json_compatible(data):
     if isinstance(data, ObjectId):
@@ -49,31 +53,41 @@ def get_random_pair():
 @app.route('/vote', methods=['POST'])
 def vote():
     data = request.get_json()
-
-    # Retrieve selected and rejected IDs
     selected_id = data.get("selected_id")
     rejected_id = data.get("rejected_id")
 
-    if not selected_id or not rejected_id:
-        return jsonify({"status": "error", "message": "Invalid ID(s)"}), 400
+    if not selected_id:
+        return jsonify({"status": "error", "message": "Invalid ID"}), 400
 
-    # Find the voted candidate
+    # Find the candidate who was voted for
     voted_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
+
     if not voted_candidate:
-        return jsonify({"status": "error", "message": "Selected candidate not found"}), 404
+        return jsonify({"status": "error", "message": "Candidate not found"}), 404
 
-    # Find the rejected candidate
-    rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
-    if not rejected_candidate:
-        return jsonify({"status": "error", "message": "Rejected candidate not found"}), 404
+    # Find all other candidates excluding the voted candidate
+    all_candidates = list(mongo.db.votes.find({"_id": {"$ne": ObjectId(selected_id)}}))
+    
+    if not all_candidates:
+        return jsonify({"status": "error", "message": "No other candidates to compare against"}), 400
+    
+    other_candidate = rejected_id  # Choose another candidate randomly
 
-    # Calculate expected outcomes for Elo
-    expected_voted = calculate_expected_outcome(voted_candidate["score"], rejected_candidate["score"])
-    expected_rejected = 1 - expected_voted
+    # Cross-check that the name and ID match to prevent errors
+    if "name" not in voted_candidate:
+        return jsonify({"status": "error", "message": "Candidate name is missing"}), 500
+    
+    # Ensure the name and ID are consistent
+    name = data.get("name").strip().lower()
+    if voted_candidate["name"].strip().lower() != name:
+        return jsonify({"status": "error", "message": "Mismatch between name and ID"}), 400
 
-    # Calculate score changes
-    score_increment = K_FACTOR * (1 - expected_voted)  # Score change for the selected candidate
-    score_decrement = K_FACTOR * expected_rejected  # Score change for the rejected candidate
+    # Elo score adjustments
+    expected_voted = 1 / (1 + 10 ** ((other_candidate["score"] - voted_candidate["score"]) / 400))
+    expected_other = 1 - expected_voted
+
+    score_increment = K_FACTOR * (1 - expected_voted)  # Increase for the voted candidate
+    score_decrement = K_FACTOR * (expected_other)  # Decrease for the other candidate
 
     # Update scores
     mongo.db.votes.update_one(
@@ -82,7 +96,7 @@ def vote():
     )
 
     mongo.db.votes.update_one(
-        {"_id": ObjectId(rejected_id)},
+        {"_id": ObjectId(other_candidate["_id"])},
         {"$inc": {"score": score_decrement}}
     )
 
