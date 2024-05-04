@@ -104,4 +104,11 @@ h2 {
         margin: 20px 0;  /* Add margin for separation */
         align-items: center;
     }
+    .person-image {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;  /* Maintain aspect ratio */
+    margin-bottom: 10px;  /* Spacing between image and button */
+}
 }
