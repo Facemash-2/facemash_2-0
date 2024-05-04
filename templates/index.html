@@ -22,8 +22,8 @@ function getRandomPair() {
     fetch('/get_random_pair')
         .then(response => response.json())
         .then(data => {
-            const leftPerson = document.getElementById('first');
-            const rightPerson = document.getElementById('second');
+            const leftPerson = document.getElementById('left-person');
+            const rightPerson = document.getElementById('right-person');
 
             leftPerson.innerHTML = `
                 <img src="/static/images/${data[0].name.toLowerCase()}.jpg" 
