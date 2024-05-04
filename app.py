@@ -46,7 +46,7 @@ def get_random_pair():
         return jsonify({"error": "Not enough candidates"}), 400
 
     # Generate a random pair avoiding candidates from the last pair
-    new_pair = random.sample([c for c in all_candidates if c not in (last_pair or [])], 2)
+    new_pair = random.sample(all_candidates, 2)
     last_pair = new_pair  # Update the last drawn pair
 
     return jsonify([new_pair[0], new_pair[1]])
