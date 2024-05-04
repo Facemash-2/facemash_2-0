@@ -54,9 +54,8 @@ def get_random_pair():
 def vote():
     try:
         data = request.get_json()
-
         if not data:
-            raise ValueError("No data received")  # Ensure data is received
+            raise ValueError("No data received")
 
         selected_id = data.get("selected_id")
         rejected_id = data.get("rejected_id")
@@ -64,14 +63,15 @@ def vote():
         if not selected_id or not rejected_id:
             raise ValueError("Selected ID or Rejected ID is missing")
 
-        # Find the candidates in the database
-        selected_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
-        if not selected_candidate:
-            raise ValueError("Selected candidate not found")
+        # Additional validation: Ensure they're different
+        if selected_id == rejected_id:
+            raise ValueError("Selected and Rejected IDs should not be the same")
 
+        selected_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
         rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
-        if not rejected_candidate:
-            raise ValueError("Rejected candidate not found")
+
+        if not selected_candidate or not rejected_candidate:
+            raise ValueError("One or both candidates not found")
 
         # Calculate Elo score changes and update scores
         expected_selected = calculate_expected_outcome(selected_candidate["score"], rejected_candidate["score"])
