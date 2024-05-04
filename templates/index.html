@@ -17,26 +17,30 @@
         }
 
         // Function to get a random pair for voting
-// Function to get a random pair for voting
+// Set the data-id attributes correctly when fetching a new random pair
 function getRandomPair() {
-    fetch('/get_random_pair')  // Fetch a random pair from the backend
+    fetch('/get_random_pair')
         .then(response => response.json())
         .then(data => {
             const leftPerson = document.getElementById('left-person');
             const rightPerson = document.getElementById('right-person');
 
             leftPerson.innerHTML = `
-                <img src="/static/images/${data.first.name.toLowerCase()}.jpg" alt="${data.first.name}"
-                    class="person-image"
-                    onclick="voteFor('${data.first._id}')">  <!-- Use the ObjectId as the parameter -->
-                <h3>${data.first.name.toLowerCase()}</h3>
+                <img src="/static/images/${data[0].name.toLowerCase()}.jpg" 
+                    alt="${data[0].name}" 
+                    class="person-image" 
+                    data-id="${data[0]._id}"  <!-- Store the ID in a data attribute -->
+                    onclick="voteFor('${data[0]._id}')">
+                <h3>${data[0].name}</h3>
             `;
 
             rightPerson.innerHTML = `
-                <img src="/static/images/${data.second.name.toLowerCase()}.jpg" alt="${data.second.name}"
-                    class="person-image"
-                    onclick="voteFor('${data.second._id}')">  <!-- Use the ObjectId as the parameter -->
-                <h3>${data.second.name.toLowerCase()}</h3>
+                <img src="/static/images/${data[1].name.toLowerCase()}.jpg" 
+                    alt="${data[1].name}" 
+                    class="person-image" 
+                    data-id="${data[1]._id}" 
+                    onclick="voteFor('${data[1]._id}')">
+                <h3>${data[1].name}</h3>
             `;
         })
         .catch(error => {
@@ -47,15 +51,17 @@ function getRandomPair() {
 
        // Function to validate and send the vote
 function voteFor(selected_id) {
-    // Determine the ID of the rejected candidate
+    // Get the left and right person images to determine which one is rejected
     const leftPerson = document.getElementById('left-person').querySelector('img');
     const rightPerson = document.getElementById('right-person').querySelector('img');
-    
-    let rejected_id;
+
+    let rejected_id;  // Variable to store the rejected ID
+
+    // Determine which candidate is rejected based on the selected ID
     if (selected_id === leftPerson.getAttribute('data-id')) {
-        rejected_id = rightPerson.getAttribute('data-id');  // Right person is rejected
+        rejected_id = rightPerson.getAttribute('data-id');  // If selected is left, rejected is right
     } else {
-        rejected_id = leftPerson.getAttribute('data-id');  // Left person is rejected
+        rejected_id = leftPerson.getAttribute('data-id');  // If selected is right, rejected is left
     }
 
     fetch('/vote', {
@@ -63,7 +69,7 @@ function voteFor(selected_id) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selected_id: selected_id, rejected_id: rejected_id })
+        body: JSON.stringify({ selected_id: selected_id, rejected_id: rejected_id })  // Include rejected_id
     })
     .then(response => {
         if (response.ok) {
@@ -73,8 +79,7 @@ function voteFor(selected_id) {
         }
     })
     .then(data => {
-        // Fetch a new random pair
-        getRandomPair();
+        getRandomPair();  // Fetch a new pair after voting
     })
     .catch(error => {
         console.error("Error sending vote:", error);
