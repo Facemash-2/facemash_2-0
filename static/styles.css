@@ -90,6 +90,7 @@ h1 {
     color: #fff;
     font-weight: 700;
     background-color: red;
+    margin-block-start:0;
 }
 
 h3 {
