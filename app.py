@@ -44,36 +44,50 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    data = request.get_json()  # Get data from the frontend
-    selected_id = data.get("selected_id")  # Retrieve the ObjectId from the request
+    data = request.get_json()  # Get the request data
+    selected_id = data.get("selected_id")  # Retrieve the selected candidate's ObjectId
 
     if not selected_id:
         return jsonify({"status": "error", "message": "Invalid ID"}), 400
 
     try:
-        # Convert the received ID to an ObjectId
+        # Find the candidate who received the vote
         candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
         if not candidate_voted_for:
             return jsonify({"status": "error", "message": "Candidate not found"}), 404
 
-        # Increment the count and adjust the score (Elo logic)
-        expected_outcome = calculate_expected_outcome(candidate_voted_for["score"], 100000)  # Calculate expected outcome
-        increment_value = 1 - expected_outcome  # Outcome if the candidate is chosen
+        # Randomly select the other candidate from the list (excluding the selected one)
+        all_candidates = list(mongo.db.votes.find())
+        other_candidate = random.choice([c for c in all_candidates if str(c["_id"]) != selected_id])
 
-        # Update the count and score
+        # Calculate expected outcomes for both candidates
+        expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
+        expected_other = 1 - expected_voted_for
+
+        # Update scores using the Elo algorithm
+        new_score_voted_for = candidate_voted_for["score"] + K_FACTOR * (1 - expected_voted_for)  # +1 if voted for
+        new_score_other = other_candidate["score"] + K_FACTOR * (0 - expected_other)  # -1 for the other candidate
+
+        # Update the count and score in the database
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
             {
-                "$inc": {"count": 1, "score": 32 * increment_value}  # Increment count and adjust score
+                "$inc": {"count": 1, "score": new_score_voted_for - candidate_voted_for["score"]}
             }
         )
 
-        return jsonify({"status": "success"})  # Return success response
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(other_candidate["_id"])},
+            {
+                "$inc": {"score": new_score_other - other_candidate["score"]}
+            }
+        )
+
+        return jsonify({"status": "success"})
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500  # Handle errors
-
+        return jsonify({"status": "error", "message": str(e)}), 500
 @app.route('/')
 def index():
     return render_template('index.html')
