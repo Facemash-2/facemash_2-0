@@ -30,12 +30,13 @@ body {
 
 /* Style for the person images */
 .person-image {
-    width: 20%;  /* Flexible width */
-    height: auto;  /* Maintain aspect ratio */
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
+    object-fit: cover;  /* Maintain aspect ratio */
+    margin-bottom: 10px;  /* Spacing between image and button */
 }
+
 
 /* Style for the vote buttons */
 .vote-button {
@@ -100,9 +101,5 @@ h2 {
         flex: 1;
         margin: 20px 0;  /* Add margin for separation */
         align-items: center;
-    }
-
-    .person-image {
-        width: 20%;  /* Full width on smaller screens */
     }
 }
