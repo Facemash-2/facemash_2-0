@@ -91,7 +91,7 @@ h2 {
     display: flex;
     justify-content: space-between;
 }
-img {
+.banner {
     max-width: 200px;
 }
 /* Media query for smaller screens */
@@ -115,7 +115,7 @@ img {
         object-fit: cover;  /* Maintain aspect ratio */
         margin-bottom: 10px;  /* Spacing between image and button */
     }
-    img {
+    .banner {
         max_width:40px;
     }
 }
