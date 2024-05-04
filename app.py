@@ -52,53 +52,51 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
+    data = request.get_json()  # Retrieve the JSON data from the POST request
+    selected_id = data.get("selected_id")
+
+    if not selected_id:
+        return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Handle invalid ID
+
     try:
-        data = request.get_json()  # Retrieve JSON data from the POST request
+        # Find the voted-for candidate
+        candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
-        if not data:
-            raise ValueError("No data provided")  # Ensure there's data
+        if not candidate_voted_for:
+            return jsonify({"status": "error", "message": "Candidate not found"}), 404  # Handle non-existent ID
 
-        selected_id = data.get("selected_id")
-        rejected_id = data.get("rejected_id")
+        # Randomly select the other candidate (excluding the voted-for candidate)
+        all_candidates = list(mongo.db.votes.find())
+        other_candidate = random.choice([c for c in all_candidates if str(c["_id"]) != selected_id])
 
-        # Check for valid IDs
-        if not selected_id or not rejected_id:
-            raise ValueError("Selected or rejected ID is missing")
+        # Calculate expected outcomes for Elo
+        expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
+        expected_other = 1 - expected_voted_for
 
-        # Find the selected candidate
-        selected_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
-        if not selected_candidate:
-            raise ValueError("Selected candidate not found")
+        # Update scores with Elo adjustments
+        score_increment = K_FACTOR * (1 - expected_voted_for)  # Score change for voted-for candidate
+        score_decrement = K_FACTOR * (-expected_other)  # Score change for other candidate
 
-        # Find the rejected candidate
-        rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
-        if not rejected_candidate:
-            raise ValueError("Rejected candidate not found")
-
-        # Calculate score updates based on the Elo system
-        expected_selected = calculate_expected_outcome(selected_candidate["score"], rejected_candidate["score"])
-        score_increment = K_FACTOR * (1 - expected_selected)
-        score_decrement = K_FACTOR * expected_selected
-
-        # Update scores
+        # Update the score for the voted-for candidate
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
-            {"$inc": {"score": score_increment}}
+            {
+                "$inc": {"score": score_increment}  # Increment the Elo score
+            }
         )
+
+        # Update the score for the other candidate
         mongo.db.votes.update_one(
-            {"_id": ObjectId(rejected_id)},
-            {"$inc": {"score": score_decrement}}
+            {"_id": ObjectId(other_candidate["_id"])},
+            {
+                "$inc": {"score": score_decrement}  # Decrement the Elo score
+            }
         )
 
-        return jsonify({"status": "success"})
-
-    except ValueError as ve:
-        app.logger.error(f"Value error in /vote endpoint: {ve}")
-        return jsonify({"status": "error", "message": str(ve)}), 400  # Return a 400 error for invalid data
+        return jsonify({"status": "success"})  # Successful vote
 
     except Exception as e:
-        app.logger.error(f"Unexpected error in /vote endpoint: {e}")
-        return jsonify({"status": "error", "message": "Internal server error"}), 500  # Return a 500 error for other issues
+        return jsonify({"status": "error", "message": str(e)}), 500  # Error handling
 @app.route('/')
 def index():
     return render_template('index.html')
