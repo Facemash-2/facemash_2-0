@@ -55,6 +55,7 @@ def vote():
     try:
         data = request.get_json()  # Retrieve JSON data from the POST request
         selected_id = data.get("selected_id")
+        rejected_id = data.get("rejected_id")
 
         if not selected_id:
             return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Return error for invalid ID
@@ -66,7 +67,7 @@ def vote():
 
         # Randomly select another candidate (excluding the voted candidate)
         all_candidates = list(mongo.db.votes.find())
-        other_candidate = random.choice([c for c in all_candidates if str(c["_id"]) != selected_id])
+        other_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
 
         if not other_candidate:
             return jsonify({"status": "error", "message": "No valid candidate to compare against"}), 500  # Check for valid other candidate
@@ -83,7 +84,7 @@ def vote():
         )
         
         mongo.db.votes.update_one(
-            {"_id": ObjectId(other_candidate["_id"])},
+            {"_id": ObjectId(other_candidate)},
             {"$inc": {"score": score_decrement}}
         )
 
