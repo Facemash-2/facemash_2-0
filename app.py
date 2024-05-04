@@ -72,23 +72,23 @@ def index():
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
-    # Fetch all candidates
     all_candidates = list(mongo.db.votes.find())
     
-    # Calculate the total score for calculating likeability percentages
-    total_score = sum(candidate["score"] for candidate in all_candidates)
-    
-    # Add likeability percentage to each candidate
+    # Calculate likeability percentage based on score changes
     for candidate in all_candidates:
-        if total_score > 0:
-            candidate["likeability"] = (candidate["score"] / total_score) * 100
+        base_score = candidate.get("base_score", 1000)
+        current_score = candidate["score"]
+
+        if base_score == 0:
+            candidate["likeability"] = 0  # Avoid division by zero
         else:
-            candidate["likeability"] = 0
+            # Calculate percentage change from base_score to score
+            score_change = current_score - base_score
+            candidate["likeability"] = (score_change / base_score) * 100
     
     # Sort candidates by score in descending order
     sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
     
-    # Return the sorted candidates with JSON compatibility
     return jsonify(convert_to_json_compatible(sorted_candidates))
 
 @app.route('/get_votes', methods=['GET'])
