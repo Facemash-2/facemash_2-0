@@ -113,4 +113,7 @@ h2 {
         object-fit: cover;  /* Maintain aspect ratio */
         margin-bottom: 10px;  /* Spacing between image and button */
     }
+    .img {
+        max_width:100px;
+    }
 }
