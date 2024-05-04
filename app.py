@@ -13,7 +13,7 @@ K_FACTOR = 32
 app.config["MONGO_URI"] = "mongodb+srv://ppgame793:CBrHkNaLAPln7GeK@hotornot.gubbic6.mongodb.net/voting_app?retryWrites=true&w=majority&appName=hotornot"
 mongo = PyMongo(app)
 
-def calculate_expected_outcome_selected(rating_a, rating_b):
+def calculate_expected_outcome(rating_a, rating_b):
     # Calculate the expected outcome for candidate A
     return 1 / (1 + pow(10, (rating_b - rating_a) / 400))
     
