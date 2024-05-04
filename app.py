@@ -38,9 +38,23 @@ for candidate in initial_votes:
 
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
+    # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
-    random_pair = random.sample(all_candidates, 2)  # Select two random candidates
-    return jsonify(convert_to_json_compatible(random_pair))
+
+    # Randomly select the first candidate
+    first_candidate = random.choice(all_candidates)
+
+    # Randomly select the second candidate, ensuring it's different from the first
+    second_candidate = random.choice(all_candidates)
+    while second_candidate == first_candidate:  # Ensure different candidates
+        second_candidate = random.choice(all_candidates)
+
+    random_pair = [first_candidate, second_candidate]
+
+    return jsonify({
+        "first": convert_to_json_compatible(first_candidate),
+        "second": convert_to_json_compatible(second_candidate),
+    })
 
 @app.route('/vote', methods=['POST'])
 def vote():
