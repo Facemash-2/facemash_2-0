@@ -29,7 +29,7 @@ function getRandomPair() {
                 <img src="/static/images/${data[0].name.toLowerCase()}.jpg" 
                     alt="${data[0].name}" 
                     class="person-image" 
-                    data-id="${data[0]._id}"  <!-- Store the ID in a data attribute -->
+                    data-id="${data[0]._id}"  
                     onclick="voteFor('${data[0]._id}')">
                 <h3>${data[0].name}</h3>
             `;
