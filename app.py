@@ -53,48 +53,48 @@ def get_random_pair():
 @app.route('/vote', methods=['POST'])
 def vote():
     try:
-        data = request.get_json()  # Retrieve JSON data from the POST request
+        data = request.get_json()  # Get JSON data from the POST request
         selected_id = data.get("selected_id")
         rejected_id = data.get("rejected_id")
 
-        if not selected_id:
-            return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Return error for invalid ID
+        # Validate that both IDs are provided
+        if not selected_id or not rejected_id:
+            return jsonify({"status": "error", "message": "Selected ID or Rejected ID is missing"}), 400
 
-        candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
-        
-        if not candidate_voted_for:
-            return jsonify({"status": "error", "message": "Candidate not found"}), 404  # Handle invalid candidate
+        # Find the selected candidate in the database
+        selected_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
+        if not selected_candidate:
+            return jsonify({"status": "error", "message": "Selected candidate not found"}), 404
 
-        # Randomly select another candidate (excluding the voted candidate)
-        all_candidates = list(mongo.db.votes.find())
-        other_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
+        # Find the rejected candidate in the database
+        rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
+        if not rejected_candidate:
+            return jsonify({"status": "error", "message": "Rejected candidate not found"}), 404
 
-        if not other_candidate:
-            return jsonify({"status": "error", "message": "No valid candidate to compare against"}), 500  # Check for valid other candidate
+        # Calculate expected outcomes for Elo
+        expected_selected = calculate_expected_outcome(selected_candidate["score"], rejected_candidate["score"])
+        expected_rejected = 1 - expected_selected
 
-        # Calculate Elo expected outcomes
-        expected_voted = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
-        score_increment = K_FACTOR * (1 - expected_voted)  # Increment for voted-for candidate
-        score_decrement = K_FACTOR * expected_voted  # Decrement for other candidate
+        # Score changes based on the Elo system
+        score_increment = K_FACTOR * (1 - expected_selected)  # Increment for the selected candidate
+        score_decrement = K_FACTOR * expected_rejected  # Decrement for the rejected candidate
 
-        # Update scores
+        # Update scores in the database
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
-            {"$inc": {"score": score_increment}}
+            {"$inc": {"score": score_increment}}  # Increase the score for selected candidate
         )
-        
+
         mongo.db.votes.update_one(
-            {"_id": ObjectId(other_candidate)},
-            {"$inc": {"score": score_decrement}}
+            {"_id": ObjectId(rejected_id)},
+            {"$inc": {"score": score_decrement}}  # Decrease the score for rejected candidate
         )
 
         return jsonify({"status": "success"})
 
     except Exception as e:
-        # Log the error for debugging
-        app.logger.error(f"Error in /vote endpoint: {e}")
-        # Return a 500 status with a descriptive message
-        return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
+        app.logger.error(f"Error in /vote endpoint: {e}")  # Log the error for debugging
+        return jsonify({"status": "error", "message": "Internal server error"}), 500  # Handle exceptions
 
 @app.route('/')
 def index():
