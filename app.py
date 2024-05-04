@@ -40,10 +40,25 @@ for candidate in initial_votes:
         )
   # Track the last pair to prevent repetition
 
+# Global variable to track the last random pair
+last_pair = []
+
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
+    global last_pair  # Declare to use the global variable
     all_candidates = list(mongo.db.votes.find())
-    random_pair = random.sample(all_candidates, 2)  # Select two random candidates
+
+    # Get a new random pair
+    new_pair = random.sample(all_candidates, 2)
+
+    # Regenerate until the new pair isn't the same as the last pair
+    while set(candidate["_id"] for candidate in new_pair) == set(candidate["_id"] for candidate in last_pair):
+        new_pair = random.sample(all_candidates, 2)
+
+    # Store the new pair as the last pair
+    last_pair = new_pair
+   random_pair = new_pair
+
     return jsonify(convert_to_json_compatible(random_pair))
 
 
