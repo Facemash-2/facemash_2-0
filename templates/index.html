@@ -27,12 +27,14 @@
                 <img src="/static/images/${data[0].name.toLowerCase()}.jpg" alt="${data[0].name}" 
                     class="person-image"
                     onclick="voteFor('${data[0]._id}')">  <!-- Use the ObjectId as the parameter -->
+                    <h3>${data[0].name.toLowerCase()}</h3>
             `;
 
             rightPerson.innerHTML = `
                 <img src="/static/images/${data[1].name.toLowerCase()}.jpg" alt="${data[1].name}" 
                     class="person-image"
                     onclick="voteFor('${data[1]._id}')">  <!-- Use the ObjectId as the parameter -->
+                    <h3>${data[1].name.toLowerCase()}</h3>
             `;
         })
         .catch(error => {
