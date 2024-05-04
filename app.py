@@ -2,13 +2,19 @@ from flask import Flask, render_template, request, jsonify
 from flask_pymongo import PyMongo
 from bson import ObjectId
 import random
+from math import pow
 
 app = Flask(__name__)
+K_FACTOR = 32
 
 # MongoDB connection string (update with your own if needed)
 app.config["MONGO_URI"] = "mongodb+srv://ppgame793:CBrHkNaLAPln7GeK@hotornot.gubbic6.mongodb.net/voting_app?retryWrites=true&w=majority&appName=hotornot"
 mongo = PyMongo(app)
 
+def calculate_expected_outcome(rating_a, rating_b):
+    # Calculate the expected outcome for candidate A
+    return 1 / (1 + pow(10, (rating_b - rating_a) / 400))
+    
 def convert_to_json_compatible(data):
     if isinstance(data, ObjectId):
         return str(data)  # Convert ObjectId to string
@@ -52,16 +58,27 @@ def vote():
 
     other_candidate = random.choice([c for c in all_candidates if c["_id"] != candidate_voted_for["_id"]])
 
-    # Increment score for the candidate who received the vote
+    # Calculate expected outcomes
+    expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
+    expected_other = 1 - expected_voted_for
+
+    # Determine actual outcomes
+    outcome_voted_for = 1  # Candidate was chosen
+    outcome_other = 0  # Candidate was not chosen
+
+    # Update scores based on the Elo algorithm
+    new_score_voted_for = candidate_voted_for["score"] + K_FACTOR * (outcome_voted_for - expected_voted_for)
+    new_score_other = other_candidate["score"] + K_FACTOR * (outcome_other - expected_other)
+
+    # Update the scores in the database
     mongo.db.votes.update_one(
-        {"_id": ObjectId(selected_id)},
-        {"$inc": {"count": 1, "score": 1}}
+        {"_id": ObjectId(candidate_voted_for["_id"])},
+        {"$set": {"score": new_score_voted_for}}
     )
 
-    # Decrement score for the other candidate
     mongo.db.votes.update_one(
         {"_id": ObjectId(other_candidate["_id"])},
-        {"$inc": {"score": -1}}
+        {"$set": {"score": new_score_other}}
     )
 
     return jsonify({"status": "success"})
@@ -72,26 +89,23 @@ def index():
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
+    # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
+    
+    # Sort candidates by their Elo scores in descending order
+    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
+    
+    # Get the highest score to calculate relative likeability
+    highest_score = sorted_candidates[0]["score"]
 
-    # Calculate likeability percentage based on score changes
-    for candidate in all_candidates:
-        base_score = candidate.get("base_score", 100000)  # Default base score
-        current_score = candidate["score"]
-
-        # Calculate the percentage change from base_score to current_score
-        if base_score == 0:
+    # Add likeability percentage to each candidate
+    for candidate in sorted_candidates:
+        if highest_score == 0:
             candidate["likeability"] = 0  # Avoid division by zero
         else:
-            score_change = current_score - base_score
-            likeability_percentage = (score_change / base_score) * 100
-            
-            # Ensure likeability percentage is not negative
-            candidate["likeability"] = max(0, likeability_percentage)
+            candidate["likeability"] = (candidate["score"] / highest_score) * 100
 
-    # Sort candidates by score in descending order
-    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
-
+    # Return the sorted candidates with JSON compatibility
     return jsonify(convert_to_json_compatible(sorted_candidates))
 
 @app.route('/get_votes', methods=['GET'])
