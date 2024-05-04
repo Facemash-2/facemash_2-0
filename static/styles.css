@@ -134,3 +134,12 @@ h2 {
         max-width:100px;
     }
 }
+@media (max-width: 400px) {
+    .banner{
+        max-width:120px;
+        padding-bottom:50px;
+    }
+    .vote-button {
+        max-width:100px;
+    }
+}
