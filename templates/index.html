@@ -78,25 +78,28 @@
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
 
-                let medallion = '';  // Default to no medallion
-
-                if (index === 0) {
-                    medallion = '🏅';  // Gold medallion for 1st place
-                    row.classList.add('top-candidate');  // Apply special class
-                } else if (index === 1) {
-                    medallion = '🥈';  // Silver medallion for 2nd place
-                    row.classList.add('second-candidate');
-                } else if (index === 2) {
-                    medallion = '🥉';  // Bronze medallion for 3rd place
-                    row.classList.add('third-candidate');
+                if (index === 0) {  // Top person on the leaderboard
+                    row.classList.add('top-candidate');  // Apply a special class for styling
                 }
 
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
-                const scoreCell = document.createlement('td');
+                const scoreCell = document.createElement('td');
 
                 positionCell.innerText = index + 1;  // Rank
-                nameCell.innerHTML = medallion + ' ' + item.name;  // Include medallion with name
+                nameCell.innerText = item.name;  // Candidate's name
+
+                if (index === 0) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🏅 ' + item.name;  // Gold medallion emoji
+                } else if (index === 1) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🥈 ' + item.name;  // Gold medallion emoji
+                } else if (index === 2) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🥉 ' + item.name;  // Gold medallion emoji
+                }
+
                 scoreCell.innerText = item.score.toFixed(2);  // Elo score
 
                 row.appendChild(positionCell);
