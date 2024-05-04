@@ -91,7 +91,9 @@ h2 {
     display: flex;
     justify-content: space-between;
 }
-
+img {
+    max-width: 200px;
+}
 /* Media query for smaller screens */
 @media (max-width: 600px) {
     .vote-pair {
