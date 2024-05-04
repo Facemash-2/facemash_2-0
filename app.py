@@ -42,15 +42,7 @@ for candidate in initial_votes:
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
     all_candidates = list(mongo.db.votes.find())
-    if len(all_candidates) < 2:
-        return jsonify({"error": "Not enough candidates"}), 400  # Ensure at least 2 candidates
-    
-    # Check that all_candidates contains valid data
-    if not all_candidates or len(all_candidates) < 2:
-        return jsonify({"error": "Invalid candidates data"}), 400
-    
-    random_pair = random.sample(all_candidates, 2)  # Select two unique candidates
-
+    random_pair = random.sample(all_candidates, 2)  # Select two random candidates
     return jsonify(convert_to_json_compatible(random_pair))
 
 
