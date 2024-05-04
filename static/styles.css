@@ -25,11 +25,12 @@ body {
 .vote-section {
     flex: 1;  /* Each section takes equal space */
     margin: 10px;
+    align-items: center;
 }
 
 /* Style for the person images */
 .person-image {
-    width: 25%;  /* Flexible width */
+    width: 20%;  /* Flexible width */
     height: auto;  /* Maintain aspect ratio */
     border-radius: 50%;
     object-fit: cover;
@@ -98,9 +99,10 @@ h2 {
     .vote-section {
         flex: 1;
         margin: 20px 0;  /* Add margin for separation */
+        align-items: center;
     }
 
     .person-image {
-        width: 25%;  /* Full width on smaller screens */
+        width: 20%;  /* Full width on smaller screens */
     }
 }
