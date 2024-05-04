@@ -73,7 +73,7 @@ def vote():
     # Update the scores in the database
     mongo.db.votes.update_one(
         {"_id": ObjectId(candidate_voted_for["_id"])},
-        {"$set": {"score": new_score_voted_for}}
+        {"$set": {"count":1,"score": new_score_voted_for}}
     )
 
     mongo.db.votes.update_one(
