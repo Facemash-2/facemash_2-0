@@ -125,3 +125,12 @@ h2 {
         max-width:100px;
     }
 }
+@media (max-width: 483px) {
+    .banner{
+        max-width:150px;
+        padding-bottom:50px;
+    }
+    .vote-button {
+        max-width:100px;
+    }
+}
