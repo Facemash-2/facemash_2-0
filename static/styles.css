@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 90%;  /* Use a percentage for flexibility */
     margin: 0 auto;
     padding: 20px;
     text-align: center;
@@ -16,24 +16,24 @@ body {
 /* Flexbox layout for horizontal alignment of the vote-pair */
 .vote-pair {
     display: flex;
-    justify-content: space-between;  /* Horizontal spacing */
+    justify-content: space-between;
+    flex-wrap: wrap;  /* Allow elements to wrap on smaller screens */
     padding: 20px;
 }
 
 /* Vertical alignment for vote sections */
 .vote-section {
-    display: flex;
-    flex-direction: column;  /* Stack elements vertically */
-    align-items: center;  /* Center-align content */
+    flex: 1;  /* Each section takes equal space */
+    margin: 10px;
 }
 
 /* Style for the person images */
 .person-image {
-    width: 150px;
-    height: 150px;
+    width: 80%;  /* Flexible width */
+    height: auto;  /* Maintain aspect ratio */
     border-radius: 50%;
-    object-fit: cover;  /* Maintain aspect ratio */
-    margin-bottom: 10px;  /* Spacing between image and button */
+    object-fit: cover;
+    margin-bottom: 10px;
 }
 
 /* Style for the vote buttons */
@@ -54,11 +54,9 @@ body {
 
 /* Style for the leaderboard table */
 .leaderboard-table {
-    margin: 20px auto;
+    width: 100%;  /* Use full width of the container */
     border-collapse: collapse;
-    width: 80%;
 }
-
 .leaderboard-table th, .leaderboard-table td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
@@ -82,4 +80,27 @@ h1 {
 h2 {
     color: #555;
     font-weight: 400;
+}
+
+/* Default styles for larger screens */
+.vote-pair {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+    .vote-pair {
+        flex-direction: column;  /* Stack elements vertically */
+        align-items: center;  /* Center-align content */
+    }
+
+    .vote-section {
+        flex: 1;
+        margin: 20px 0;  /* Add margin for separation */
+    }
+
+    .person-image {
+        width: 100%;  /* Full width on smaller screens */
+    }
 }
