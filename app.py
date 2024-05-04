@@ -44,19 +44,20 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    data = request.get_json()  # Retrieve JSON data from the request
-    selected_id = data.get("selected_id")  # Get the selected candidate's ID
+    data = request.get_json()  # Get data from the frontend
+    selected_id = data.get("selected_id")  # Retrieve the ObjectId from the request
 
     if not selected_id:
         return jsonify({"status": "error", "message": "Invalid ID"}), 400
 
     try:
+        # Convert the received ID to an ObjectId
         candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
         if not candidate_voted_for:
             return jsonify({"status": "error", "message": "Candidate not found"}), 404
 
-        # Increment the count and adjust the score based on Elo logic
+        # Increment the count and adjust the score (Elo logic)
         expected_outcome = calculate_expected_outcome(candidate_voted_for["score"], 100000)  # Calculate expected outcome
         increment_value = 1 - expected_outcome  # Outcome if the candidate is chosen
 
@@ -64,14 +65,14 @@ def vote():
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
             {
-                "$inc": {"count": 1, "score": 32 * increment_value}
+                "$inc": {"count": 1, "score": 32 * increment_value}  # Increment count and adjust score
             }
         )
 
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success"})  # Return success response
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500  # Catch errors and return a proper response
+        return jsonify({"status": "error", "message": str(e)}), 500  # Handle errors
 
 @app.route('/')
 def index():
