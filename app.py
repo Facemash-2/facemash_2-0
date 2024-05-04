@@ -56,32 +56,30 @@ def vote():
     if not candidate_voted_for:
         return jsonify({"status": "error", "message": "Candidate not found"}), 404
 
+    # Randomly choose the other candidate
     other_candidate = random.choice([c for c in all_candidates if c["_id"] != candidate_voted_for["_id"]])
 
     # Calculate expected outcomes
     expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
     expected_other = 1 - expected_voted_for
 
-    # Determine actual outcomes
-    outcome_voted_for = 1  # Candidate was chosen
-    outcome_other = 0  # Candidate was not chosen
+    # Increment the count and adjust the scores based on Elo logic
+    try:
+        # Update for candidate voted for
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(candidate_voted_for["_id"])},
+            {"$inc": {"count": 1, "score": K_FACTOR * (1 - expected_voted_for)}}
+        )
 
-    # Update scores based on the Elo algorithm
-    new_score_voted_for = candidate_voted_for["score"] + K_FACTOR * (outcome_voted_for - expected_voted_for)
-    new_score_other = other_candidate["score"] + K_FACTOR * (outcome_other - expected_other)
+        # Update for other candidate
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(other_candidate["_id"])},
+            {"$inc": {"score": K_FACTOR * (-expected_other)}}
+        )
 
-    # Update the scores in the database
-    mongo.db.votes.update_one(
-        {"_id": ObjectId(candidate_voted_for["_id"])},
-        {"$set": {"count":1,"score": new_score_voted_for}}
-    )
-
-    mongo.db.votes.update_one(
-        {"_id": ObjectId(other_candidate["_id"])},
-        {"$set": {"score": new_score_other}}
-    )
-
-    return jsonify({"status": "success"})
+        return jsonify({"status": "success"})
+    except pymongo.errors.PyMongoError as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/')
 def index():
