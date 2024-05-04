@@ -36,17 +36,20 @@ for candidate in initial_votes:
             {"$set": {"score": 1000}}
         )
 
+last_pair = None  # Track the last pair to prevent repetition
 
 @app.route('/get_random_pair', methods=['GET'])
 def get_random_pair():
+    global last_pair
     all_candidates = list(mongo.db.votes.find())
     if len(all_candidates) < 2:
         return jsonify({"error": "Not enough candidates"}), 400
 
-    # Ensure two unique candidates are chosen
-    random_pair = random.sample(all_candidates, 2)
-    return jsonify([convert_to_json_compatible(random_pair[0]), convert_to_json_compatible(random_pair[1])])
+    # Generate a random pair avoiding candidates from the last pair
+    new_pair = random.sample([c for c in all_candidates if c not in (last_pair or [])], 2)
+    last_pair = new_pair  # Update the last drawn pair
 
+    return jsonify([new_pair[0], new_pair[1]])
 
 @app.route('/vote', methods=['POST'])
 def vote():
@@ -59,30 +62,38 @@ def vote():
     # Find the candidate who was voted for
     voted_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
-    # Ensure that the selected candidate exists
     if not voted_candidate:
         return jsonify({"status": "error", "message": "Candidate not found"}), 404
 
-    # Find all other candidates excluding the voted candidate
+    # Retrieve all other candidates excluding the voted candidate
     all_candidates = list(mongo.db.votes.find({"_id": {"$ne": ObjectId(selected_id)}}))
-
+    
     if not all_candidates:
         return jsonify({"status": "error", "message": "No other candidates to compare against"}), 400
+    
+    other_candidate = random.choice(all_candidates)  # Choose another candidate randomly
 
-    # Randomly select another candidate from the remaining list
-    other_candidate = random.choice(all_candidates)
+    # Cross-check the name before updating scores
+    if voted_candidate["name"].lower() != data.get("name").lower():
+        return jsonify({"status": "error", "message": "Mismatch between name and ID"}), 400
 
-    # Calculate expected outcomes
-    expected_voted = calculate_expected_outcome(voted_candidate["score"], other_candidate["score"])
+    # Expected outcomes and score changes for Elo
+    expected_voted = 1 / (1 + 10 ** ((other_candidate["score"] - voted_candidate["score"]) / 400))
+    increment = K_FACTOR * (1 - expected_voted)
+    
     expected_other = 1 - expected_voted
-
-    # Calculate score changes
-    increment = K_FACTOR * (1 - expected_voted)  # Voted candidate
-    decrement = K_FACTOR * (0 - expected_other)  # Other candidate
-
-    # Update scores in the database
-    mongo.db.votes.update_one({"_id": ObjectId(selected_id)}, {"$inc": {"score": increment}})
-    mongo.db.votes.update_one({"_id": ObjectId(other_candidate["_id"])}, {"$inc": {"score": decrement}})
+    decrement = K_FACTOR * expected_other
+    
+    # Update the scores
+    mongo.db.votes.update_one(
+        {"_id": ObjectId(selected_id)},
+        {"$inc": {"score": increment}}
+    )
+    
+    mongo.db.votes.update_one(
+        {"_id": ObjectId(other_candidate["_id"])},
+        {"$inc": {"score": decrement}}
+    )
 
     return jsonify({"status": "success"})
 @app.route('/')
