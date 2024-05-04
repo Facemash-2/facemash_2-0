@@ -29,7 +29,7 @@ body {
 
 /* Style for the person images */
 .person-image {
-    width: 50%;  /* Flexible width */
+    width: 25%;  /* Flexible width */
     height: auto;  /* Maintain aspect ratio */
     border-radius: 50%;
     object-fit: cover;
@@ -101,6 +101,6 @@ h2 {
     }
 
     .person-image {
-        width: 50%;  /* Full width on smaller screens */
+        width: 25%;  /* Full width on smaller screens */
     }
 }
