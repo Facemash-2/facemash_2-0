@@ -2,12 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Facemash 2.0</title>
+    <title>Facemash 2.0 <!-- Toggle switch for dark mode -->
+<label class="theme-switch">
+    <input type="checkbox" id="theme-toggle" />
+    <span class="slider"></span>
+</label>
+</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Viewport meta tag -->
 </head>
     <script>
+        function toggleTheme() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const newTheme = themeToggle.checked ? 'dark' : 'light';  // Determine theme based on checkbox state
+    document.body.setAttribute('data-theme', newTheme);
+
+    // Store the theme preference in local storage
+    localStorage.setItem('theme', newTheme);
+}
+
+function setInitialTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const defaultTheme = 'light';  // Default to light if no preference
+    const themeToUse = savedTheme || defaultTheme;
+
+    document.body.setAttribute('data-theme', themeToUse);
+
+    // Set the checkbox state based on the initial theme
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.checked = (themeToUse === 'dark');
+}
+
+document.getElementById('theme-toggle').addEventListener('change', toggleTheme);  // Add event listener for the switch
+
+window.onload = setInitialTheme;  // Set the initial theme on page load
        
 
         // Function to sort an array of vote objects by the 'count' field in descending order
