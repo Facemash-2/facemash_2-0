@@ -81,6 +81,12 @@
                 if (index === 0) {  // Top person on the leaderboard
                     row.classList.add('top-candidate');  // Apply a special class for styling
                 }
+                if (index === 0) {  // Top person on the leaderboard
+                    row.classList.add('second-candidate');  // Apply a special class for styling
+                }
+                if (index === 0) {  // Top person on the leaderboard
+                    row.classList.add('third-candidate');  // Apply a special class for styling
+                }
 
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
@@ -104,7 +110,6 @@
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
-                row.appendChild(scoreCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
