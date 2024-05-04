@@ -44,51 +44,51 @@ def get_random_pair():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    data = request.get_json()
+    data = request.get_json()  # Retrieve the JSON data from the POST request
     selected_id = data.get("selected_id")
 
     if not selected_id:
-        return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Error handling for invalid ID
+        return jsonify({"status": "error", "message": "Invalid ID"}), 400  # Handle invalid ID
 
     try:
-        # Retrieve all candidates and the selected one
-        all_candidates = list(mongo.db.votes.find())
+        # Find the voted-for candidate
         candidate_voted_for = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
 
         if not candidate_voted_for:
-            return jsonify({"status": "error", "message": "Candidate not found"}), 404  # Candidate not found
+            return jsonify({"status": "error", "message": "Candidate not found"}), 404  # Handle non-existent ID
 
-        # Randomly select the other candidate
-        other_candidate = random.choice([c for c in all_candidates if c["_id"] != candidate_voted_for["_id"]])
+        # Randomly select the other candidate (excluding the voted-for candidate)
+        all_candidates = list(mongo.db.votes.find())
+        other_candidate = random.choice([c for c in all_candidates if str(c["_id"]) != selected_id])
 
-        # Calculate expected outcomes
+        # Calculate expected outcomes for Elo
         expected_voted_for = calculate_expected_outcome(candidate_voted_for["score"], other_candidate["score"])
         expected_other = 1 - expected_voted_for
 
-        # Update scores using the Elo system
-        score_increment = K_FACTOR * (1 - expected_voted_for)  # Positive for the voted-for candidate
-        score_decrement = K_FACTOR * (0 - expected_other)  # Negative for the other candidate
+        # Update scores with Elo adjustments
+        score_increment = K_FACTOR * (1 - expected_voted_for)  # Score change for voted-for candidate
+        score_decrement = K_FACTOR * (-expected_other)  # Score change for other candidate
 
-        # Update the count and score for the voted-for candidate
+        # Update the score for the voted-for candidate
         mongo.db.votes.update_one(
-            {"_id": ObjectId(candidate_voted_for["_id"])},
+            {"_id": ObjectId(selected_id)},
             {
-                "$inc": {"count": 1, "score": score_increment}  # Increment count and score
+                "$inc": {"score": score_increment}  # Increment the Elo score
             }
         )
 
-        # Update the score for the rejected candidate
+        # Update the score for the other candidate
         mongo.db.votes.update_one(
             {"_id": ObjectId(other_candidate["_id"])},
             {
-                "$inc": {"score": score_decrement}  # Only adjust score, count remains unchanged
+                "$inc": {"score": score_decrement}  # Decrement the Elo score
             }
         )
 
         return jsonify({"status": "success"})  # Successful vote
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500  # Handle errors
+        return jsonify({"status": "error", "message": str(e)}), 500  # Error handling
 @app.route('/')
 def index():
     return render_template('index.html')
