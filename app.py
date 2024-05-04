@@ -96,7 +96,7 @@ def vote():
     )
 
     mongo.db.votes.update_one(
-        {"_id": ObjectId(other_candidate["_id"])},
+        {"_id": ObjectId(other_candidate)},
         {"$inc": {"score": score_decrement}}
     )
 
