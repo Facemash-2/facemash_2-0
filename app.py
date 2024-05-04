@@ -53,49 +53,52 @@ def get_random_pair():
 @app.route('/vote', methods=['POST'])
 def vote():
     try:
-        data = request.get_json()  # Get JSON data from the POST request
+        data = request.get_json()  # Retrieve JSON data from the POST request
+
+        if not data:
+            raise ValueError("No data provided")  # Ensure there's data
+
         selected_id = data.get("selected_id")
         rejected_id = data.get("rejected_id")
 
-        # Validate that both IDs are provided
+        # Check for valid IDs
         if not selected_id or not rejected_id:
-            return jsonify({"status": "error", "message": "Selected ID or Rejected ID is missing"}), 400
+            raise ValueError("Selected or rejected ID is missing")
 
-        # Find the selected candidate in the database
+        # Find the selected candidate
         selected_candidate = mongo.db.votes.find_one({"_id": ObjectId(selected_id)})
         if not selected_candidate:
-            return jsonify({"status": "error", "message": "Selected candidate not found"}), 404
+            raise ValueError("Selected candidate not found")
 
-        # Find the rejected candidate in the database
+        # Find the rejected candidate
         rejected_candidate = mongo.db.votes.find_one({"_id": ObjectId(rejected_id)})
         if not rejected_candidate:
-            return jsonify({"status": "error", "message": "Rejected candidate not found"}), 404
+            raise ValueError("Rejected candidate not found")
 
-        # Calculate expected outcomes for Elo
+        # Calculate score updates based on the Elo system
         expected_selected = calculate_expected_outcome(selected_candidate["score"], rejected_candidate["score"])
-        expected_rejected = 1 - expected_selected
+        score_increment = K_FACTOR * (1 - expected_selected)
+        score_decrement = K_FACTOR * expected_selected
 
-        # Score changes based on the Elo system
-        score_increment = K_FACTOR * (1 - expected_selected)  # Increment for the selected candidate
-        score_decrement = K_FACTOR * expected_rejected  # Decrement for the rejected candidate
-
-        # Update scores in the database
+        # Update scores
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
-            {"$inc": {"score": score_increment}}  # Increase the score for selected candidate
+            {"$inc": {"score": score_increment}}
         )
-
         mongo.db.votes.update_one(
             {"_id": ObjectId(rejected_id)},
-            {"$inc": {"score": score_decrement}}  # Decrease the score for rejected candidate
+            {"$inc": {"score": score_decrement}}
         )
 
         return jsonify({"status": "success"})
 
-    except Exception as e:
-        app.logger.error(f"Error in /vote endpoint: {e}")  # Log the error for debugging
-        return jsonify({"status": "error", "message": "Internal server error"}), 500  # Handle exceptions
+    except ValueError as ve:
+        app.logger.error(f"Value error in /vote endpoint: {ve}")
+        return jsonify({"status": "error", "message": str(ve)}), 400  # Return a 400 error for invalid data
 
+    except Exception as e:
+        app.logger.error(f"Unexpected error in /vote endpoint: {e}")
+        return jsonify({"status": "error", "message": "Internal server error"}), 500  # Return a 500 error for other issues
 @app.route('/')
 def index():
     return render_template('index.html')
