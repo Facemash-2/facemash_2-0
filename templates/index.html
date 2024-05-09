@@ -108,8 +108,7 @@ function voteFor(selected_id) {
                 
 
                 const positionCell = document.createElement('td');
-                const nameCell = document.createElement('td');
-                const scoreCell = document.createElement('td');
+                const nameCell = document.createElement('td');\
                 const countCell = document.createElement('td');
                 countCell.innerText = item.count;
                 row.appendChild(countCell);
@@ -132,7 +131,7 @@ function voteFor(selected_id) {
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
-                row.appendChild(scoreCell);
+                row.appendChild(countCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
