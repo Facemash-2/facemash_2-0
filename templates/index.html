@@ -128,6 +128,7 @@ function voteFor(selected_id) {
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
+                row.appendChild(scoreCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
@@ -172,6 +173,7 @@ function voteFor(selected_id) {
                 <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Votes</th>
                 </tr>
             </thead>
             <tbody id="leaderboard">
