@@ -105,6 +105,9 @@ function voteFor(selected_id) {
                 if (index === 2) {  // Top person on the leaderboard
                     row.classList.add('third-candidate');  // Apply a special class for styling
                 }
+                const countCell = document.createElement('td');
+                countCell.innerText = item.count;
+                row.appendChild(countCell);
 
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
