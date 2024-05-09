@@ -84,6 +84,11 @@ def vote():
         score_increment = K_FACTOR * (1 - expected_selected)  # Winner gets increment
         score_decrement = K_FACTOR * expected_selected  # Loser gets decrement
 
+        mongo.db.votes.update_one(
+            {"_id": ObjectId(selected_id)},
+            {"$inc": {"count": 1}}
+        )
+
         # Update the scores
         mongo.db.votes.update_one(
             {"_id": ObjectId(selected_id)},
