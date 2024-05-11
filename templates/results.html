@@ -1,0 +1,78 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .podium .candidate {
+            margin: 0 10px;
+            flex: 1;
+            text-align: center;
+        }
+        .candidate img {
+            width: 150px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .top-candidate {
+            color: #FFD700; /* Gold */
+        }
+        .second-candidate {
+            color: #C0C0C0; /* Silver */
+        }
+        .third-candidate {
+            color: #CD7F32; /* Bronze */
+        }
+        .medal {
+            font-size: 24px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Results</h1>
+    <div class="podium">
+        <div class="candidate top-candidate">
+            <span class="medal">🏅</span>
+            <br>
+            <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
+            <br>
+            <span>{{ top_candidate.name }}</span>
+            <br>
+            <span>({{ top_candidate.score.toFixed(2) }})</span>
+        </div>
+        <div class="candidate second-candidate">
+            <span class="medal">🥈</span>
+            <br>
+            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
+            <br>
+            <span>{{ second_candidate.name }}</span>
+            <br>
+            <span>({{ second_candidate.score.toFixed(2) }})</span>
+        </div>
+        <div class="candidate third-candidate">
+            <span class="medal">🥉</span>
+            <br>
+            <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
+            <br>
+            <span>{{ third_candidate.name }}</span>
+            <br>
+            <span>({{ third_candidate.score.toFixed(2) }})</span>
+        </div>
+    </div>
+</body>
+</html>
