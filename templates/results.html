@@ -47,7 +47,7 @@
         <div class="candidate">
             <span class="medal gold">🥇</span>
             <br>
-            <img src="{{ top_candidate.image }}" alt="{{ top_candidate.name }}">
+            <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
             <br>
             <span>{{ top_candidate.name }}</span>
             <br>
@@ -56,7 +56,7 @@
         <div class="candidate">
             <span class="medal silver">🥈</span>
             <br>
-            <img src="{{ second_candidate.image }}" alt="{{ second_candidate.name }}">
+            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
             <br>
             <span>{{ second_candidate.name }}</span>
             <br>
@@ -65,7 +65,7 @@
         <div class="candidate">
             <span class="medal bronze">🥉</span>
             <br>
-            <img src="{{ third_candidate.image }}" alt="{{ third_candidate.name }}">
+            <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
             <br>
             <span>{{ third_candidate.name }}</span>
             <br>
