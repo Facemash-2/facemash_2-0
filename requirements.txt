@@ -13,3 +13,6 @@ Werkzeug==3.0.2
 wheel==0.43.0
 flask-cors
 flask_login
+random 
+celery
+datetime
