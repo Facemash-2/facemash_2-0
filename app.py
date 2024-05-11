@@ -18,7 +18,7 @@ K_FACTOR = 32
 app.config['EMAIL_HOST'] = 'smtp.gmail.com'  # SMTP server host
 app.config['EMAIL_PORT'] = 587  # SMTP server port
 app.config['EMAIL_USERNAME'] = '784a35689@gmail.com'  # Your email address
-app.config['EMAIL_PASSWORD'] = 'Dante699'  # Your email password
+app.config['EMAIL_PASSWORD'] = 'Dante699@@'  # Your email password
 app.config['EMAIL_RECIPIENT'] = 'ooknacx7@duck.com'  # Recipient email address
 
 # Celery configuration
