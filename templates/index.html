@@ -25,6 +25,13 @@ function getRandomPair() {
             const leftPerson = document.getElementById('left-person');
             const rightPerson = document.getElementById('right-person');
 
+            // Ensure both candidates are different
+            let candidate1, candidate2;
+            do {
+                candidate1 = data[Math.floor(Math.random() * data.length)];
+                candidate2 = data[Math.floor(Math.random() * data.length)];
+            } while (candidate1._id === candidate2._id);
+
             leftPerson.innerHTML = `
                 <img src="/static/images/${data[0].name.toLowerCase()}.jpg" 
                     alt="${data[0].name}" 
