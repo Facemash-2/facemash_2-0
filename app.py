@@ -22,7 +22,13 @@ def calculate_expected_outcome(rating_a, rating_b):
     # Calculate the expected outcome for candidate A
     return 1 / (1 + pow(10, (rating_b - rating_a) / 400))
     
-    
+
+
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+
 def convert_to_json_compatible(data):
     if isinstance(data, ObjectId):
         return str(data)  # Convert ObjectId to string
