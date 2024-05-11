@@ -122,7 +122,7 @@ def get_leaderboard():
         else:
             candidate['likeability_percentage'] = 0  # Handle division by zero case
     # Sort candidates by their Elo scores in descending order
-    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
+    sorted_candidates = sorted(all_candidates, key=lambda x: x["likeability_percentage"], reverse=True)
     # Convert to JSON-compatible format
     return jsonify(convert_to_json_compatible(all_candidates))
     return jsonify(convert_to_json_compatible(sorted_candidates))
