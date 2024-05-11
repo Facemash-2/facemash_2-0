@@ -5,108 +5,16 @@ from bson import ObjectId
 import random
 from math import pow
 from flask_cors import CORS
-from datetime import timedelta, datetime
-from celery import Celery
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
 app = Flask(__name__)
 CORS(app)
 K_FACTOR = 32
 
-app.config['EMAIL_HOST'] = 'smtp.gmail.com'  # SMTP server host
-app.config['EMAIL_PORT'] = 587  # SMTP server port
-app.config['EMAIL_USERNAME'] = '784a35689@gmail.com'  # Your email address
-app.config['EMAIL_PASSWORD'] = 'Dante699@@'  # Your email password
-app.config['EMAIL_RECIPIENT'] = 'ooknacx7@duck.com'  # Recipient email address
-
-# Celery configuration
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.conf.update(app.config)
 
 
 # MongoDB connection string (update with your own if needed)
 app.config["MONGO_URI"] = "mongodb+srv://ppgame793:CBrHkNaLAPln7GeK@hotornot.gubbic6.mongodb.net/voting_app?retryWrites=true&w=majority&appName=hotornot"
 mongo = PyMongo(app)
-app.secret_key = 'x6M`h[V;/cfT(['
 
-# Function to generate a random password
-def generate_random_password():
-    # Implement password generation logic here (example)
-    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for _ in range(12))
-
-# Task to update admin password every 24 hours
-@celery.task
-def update_admin_password():
-    new_password = generate_random_password()
-    app.config['ADMIN_PASSWORD'] = new_password
-    notify_admins(new_password)
-
-# Schedule the task to run every 24 hours
-celery.conf.beat_schedule = {
-    'update-password-every-24-hours': {
-        'task': 'app.update_admin_password',
-        'schedule': timedelta(hours=24),
-    },
-}
-
-def notify_admins(new_password):
-    # Email configuration
-    sender_email = app.config['EMAIL_USERNAME']
-    recipient_email = app.config['EMAIL_RECIPIENT']
-    email_password = app.config['EMAIL_PASSWORD']
-    
-    # Email content
-    subject = 'New Admin Password'
-    body = f'Your new admin password is: {new_password}'
-
-    # Create a multipart message
-    message = MIMEMultipart()
-    message['From'] = sender_email
-    message['To'] = recipient_email
-    message['Subject'] = subject
-
-    # Add body to email
-    message.attach(MIMEText(body, 'plain'))
-
-    # Create SMTP session for sending the mail
-    server = smtplib.SMTP(app.config['EMAIL_HOST'], app.config['EMAIL_PORT'])
-    server.starttls()  # Enable encryption
-    server.login(sender_email, email_password)
-
-    # Send mail
-    server.sendmail(sender_email, recipient_email, message.as_string())
-    server.quit()
-
-# Flask routes
-# Admin login route
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if password == app.config.get('ADMIN_PASSWORD'):
-            session['admin_authenticated'] = True
-            return redirect(url_for('admin_dashboard'))
-        else:
-            return "Incorrect password. Please try again."
-    else:
-        return render_template('admin_login.html')
-
-# Admin dashboard route
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    if session.get('admin_authenticated'):
-        return render_template('admin_dashboard.html')
-    else:
-        return redirect(url_for('admin'))
-
-# Admin logout route
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('admin_authenticated', None)
-    return redirect(url_for('admin'))
 
 
 
@@ -157,11 +65,6 @@ def get_random_pair():
     random_pair = new_pair
 
     return jsonify(convert_to_json_compatible(random_pair))
-
-
-@app.route('/admin')
-def admin():
-    return render_template('admin.html')
 
 
 @app.route('/vote', methods=['POST'])
