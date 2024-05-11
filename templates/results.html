@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Results</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -45,7 +46,7 @@
     <h1>Results</h1>
     <div class="podium">
         
-        <div class="candidate" style='padding-top:100px;'>
+        <div class="candidate" style='padding-top:500px;'>
             <span class="medal silver" >🥈</span>
             <br>
             <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
@@ -55,7 +56,7 @@
             <span>Score: {{ second_candidate.score }}</span>
         </div>
         <div class="candidate">
-            <span class="medal gold">🥇</span>
+            <span class="medal gold" style='padding-bottom:150px;'>🥇</span>
             <br>
             <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
             <br>
