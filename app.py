@@ -62,6 +62,11 @@ def get_random_pair():
     return jsonify(convert_to_json_compatible(random_pair))
 
 
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+
 @app.route('/vote', methods=['POST'])
 def vote():
     try:
