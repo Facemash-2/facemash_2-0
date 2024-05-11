@@ -6,21 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
 
-    <style>
-        /* Styles for the loading animation */
-        .loading-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0); /* Semi-transparent white background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999; /* Ensure it's above other elements */
-        }
-    </style>
+  
     <script>
         // Function to hide the loading animation once the page is loaded
         window.addEventListener('load', function() {
@@ -36,10 +22,6 @@
         body {
             margin: 0;
             padding: 0;
-            background: url("/static/confetti.gif?v={{ timestamp }}") center center fixed;
-            background-size: cover;
-            overflow: hidden; /* Prevent scrolling while the GIF is displayed */
-            background-repeat: no-repeat; /* Ensure the GIF doesn't loop */
         }
         .container1 {
             max-width: 100%;  /* Use a percentage for flexibility */
