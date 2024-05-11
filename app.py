@@ -47,7 +47,7 @@ def results():
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    return render_template('index.html')
 
 @app.route('/add_person', methods=['POST'])
 def add_person():
