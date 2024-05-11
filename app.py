@@ -154,7 +154,7 @@ def vote():
         return jsonify({"status": "error", "message": "Internal server error"}), 500
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('results.html')
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
