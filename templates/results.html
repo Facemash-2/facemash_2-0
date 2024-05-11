@@ -56,7 +56,7 @@
             <br>
             <span>{{ second_candidate.name }}</span>
             <br>
-            <span></span>
+            <span>Score: {{ round(second_candidate.score) }}</span
         </div>
         <div class="candidate" style="margin-bottom: 70px;"> <!-- Adjusted height for gold medal candidate -->
             <span class="medal gold">🥇</span>
@@ -65,7 +65,7 @@
             <br>
             <span>{{ top_candidate.name }}</span>
             <br>
-            <span></span>
+            <span>Score: {{ round(top_candidate.score) }}</span>
         </div>
         <div class="candidate" style="margin-bottom: 0px;"> <!-- Adjusted height for bronze medal candidate -->
             <span class="medal bronze">🥉</span>
@@ -74,7 +74,7 @@
             <br>
             <span>{{ third_candidate.name }}</span>
             <br>
-            <span></span>
+            <span>Score: {{ round(third_candidate.score) }}</span>
         </div>
     </div>
 </body>
