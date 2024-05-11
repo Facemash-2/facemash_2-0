@@ -78,11 +78,10 @@
         </div>
     </div>
     <script>
-        // Function to round a number to a specified number of decimal places
-        function round(number, precision) {
-            var factor = Math.pow(10, precision);
-            return Math.round(number * factor) / factor;
-        }
-    </script>
+    // Function to round a number to the nearest integer (remove decimal digits)
+    function round(number) {
+        return Math.round(number);
+    }
+</script>
 </body>
 </html>
