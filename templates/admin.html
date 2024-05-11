@@ -1,1 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Facemash 2.0
+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Viewport meta tag -->
+</head>
+    <script>
+        
 
+        // Function to sort an array of vote objects by the 'count' field in descending order
+        function sortVotesDescending(votes) {
+            return votes.sort((a, b) => b.count - a.count);
+        }
+
+        // Function to get a random pair for voting
+// Set the data-id attributes correctly when fetching a new random pair
+function getRandomPair() {
+    fetch('/get_random_pair')
+        .then(response => response.json())
+        .then(data => {
+            const leftPerson = document.getElementById('left-person');
+            const rightPerson = document.getElementById('right-person');
+
+            leftPerson.innerHTML = `
+                <img src="/static/images/${data[0].name.toLowerCase()}.jpg" 
+                    alt="${data[0].name}" 
+                    class="person-image" 
+                    data-id="${data[0]._id}"  
+                    onclick="voteFor('${data[0]._id}')">
+                <h3>${data[0].name}</h3>
+            `;
+
+            rightPerson.innerHTML = `
+                <img src="/static/images/${data[1].name.toLowerCase()}.jpg" 
+                    alt="${data[1].name}" 
+                    class="person-image" 
+                    data-id="${data[1]._id}" 
+                    onclick="voteFor('${data[1]._id}')">
+                <h3>${data[1].name}</h3>
+            `;
+        })
+        .catch(error => {
+            console.error("Error fetching random pair:", error);
+        });
+}
+
+
+       // Function to validate and send the vote
+function voteFor(selected_id) {
+    // Get the left and right person images to determine which one is rejected
+    const leftPerson = document.getElementById('left-person').querySelector('img');
+    const rightPerson = document.getElementById('right-person').querySelector('img');
+
+    let rejected_id;  // Variable to store the rejected ID
+
+    // Determine which candidate is rejected based on the selected ID
+    if (selected_id === leftPerson.getAttribute('data-id')) {
+        rejected_id = rightPerson.getAttribute('data-id');  // If selected is left, rejected is right
+    } else {
+        rejected_id = leftPerson.getAttribute('data-id');  // If selected is right, rejected is left
+    }
+
+    fetch('/vote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selected_id: selected_id, rejected_id: rejected_id })  // Include rejected_id
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Failed to submit vote');
+        }
+    })
+    .then(data => {
+        getRandomPair();  // Fetch a new pair after voting
+    })
+    .catch(error => {
+        console.error("Error sending vote:", error);
+    });
+}
+        // Function to update the leaderboard
+        function updateVotes() {
+    fetch('/get_leaderboard')  // Fetch the leaderboard data
+        .then(response => response.json())
+        .then(data => {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = '';  // Clear existing content
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+
+                if (index === 0) {  // Top person on the leaderboard
+                    row.classList.add('top-candidate');  // Apply a special class for styling
+                }
+                if (index === 1) {  // Top person on the leaderboard
+                    row.classList.add('second-candidate');  // Apply a special class for styling
+                }
+                if (index === 2) {  // Top person on the leaderboard
+                    row.classList.add('third-candidate');  // Apply a special class for styling
+                }
+                
+
+                const positionCell = document.createElement('td');
+                const nameCell = document.createElement('td');
+                const scoreCell = document.createElement('td');
+                const countCell = document.createElement('td');
+                countCell.innerText = item.count;
+                row.appendChild(countCell);
+
+                positionCell.innerText = index + 1;  // Rank
+                nameCell.innerText = item.name;  // Candidate's name
+
+                if (index === 0) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🏅 ' + item.name;  // Gold medallion emoji
+                } else if (index === 1) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🥈 ' + item.name;  // Gold medallion emoji
+                } else if (index === 2) {
+                    // Add a gold medallion to the top-ranked candidate
+                    nameCell.innerHTML = '🥉 ' + item.name;  // Gold medallion emoji
+                }
+
+                scoreCell.innerText = item.score.toFixed(2);  // Elo score
+
+                row.appendChild(positionCell);
+                row.appendChild(nameCell);
+                row.appendChild(countCell);
+
+                leaderboard.appendChild(row);  // Append to the leaderboard
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching leaderboard:", error);
+        });
+}
+
+        window.onload = function() {
+            getRandomPair();  // Display the initial pair on page load
+            updateVotes();  // Fetch and update the leaderboard
+            setInterval(updateVotes, 1000);  // Refresh the leaderboard every 5 seconds
+        };
+    </script>
+<body>
+    <div class="container1">
+    <h1>Facemash 2.0</h1>
+    <div>
+    <div class="container">
+        
+        <p style='font-size: 30px;margin-block-start: 0;'>Who's Hotter? Click to choose.</p>
+
+        <!-- Section for displaying two candidates for voting -->
+        <div class="vote-pair">
+            <div id="left-person" class="vote-section">
+                <!-- Content is dynamically inserted here -->
+            </div>
+
+        
+            <img class="banner" src="/static/versus.png"></img>
+        
+
+            <div id="right-person" class="vote-section">
+                <!-- Content is dynamically inserted here -->
+            </div>
+        </div>
+
+        <h2>Leaderboard</h2>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Votes</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard">
+                <!-- Dynamic content will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
