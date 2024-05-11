@@ -5,7 +5,6 @@ from bson import ObjectId
 import random
 from math import pow
 from flask_cors import CORS
-import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -19,76 +18,7 @@ mongo = PyMongo(app)
 
 
 
-# Route for the daily duel page
-@app.route('/daily_duel', methods=['GET'])
-def daily_duel():
-    # Check if it's time to update the daily duel
-    current_time = datetime.datetime.now()
-    if current_time.hour == 0 and current_time.minute == 0:
-        update_daily_duel()
 
-    # Retrieve the current daily duel from the database
-    daily_duel = mongo.db.daily_duel.find_one()
-
-    # If no duel is currently set, select new candidates
-    if not daily_duel:
-        update_daily_duel()
-        daily_duel = mongo.db.daily_duel.find_one()
-
-    # Render the daily duel template with the selected candidates
-    return render_template('daily_duel.html', daily_duel=daily_duel)
-
-def update_daily_duel():
-    # Select two random candidates
-    all_candidates = list(mongo.db.votes.find())
-    daily_duel_candidates = random.sample(all_candidates, 2)
-
-    # Store the daily duel candidates in the database
-    mongo.db.daily_duel.update_one({}, {"$set": {"candidates": daily_duel_candidates, "votes": {}}}, upsert=True)
-
-@app.route('/vote_daily_duel', methods=['POST'])
-def vote_daily_duel():
-    data = request.get_json()
-
-    duel_id = data.get("duel_id")
-    selected_candidate_id = data.get("selected_candidate_id")
-    user_id = data.get("user_id")
-
-    # Check if the user has already voted in this duel
-    daily_duel = mongo.db.daily_duel.find_one()
-    if daily_duel and duel_id in daily_duel['votes']:
-        return jsonify({"status": "error", "message": "You have already voted in this duel."}), 400
-
-    # Increment the vote count for the selected candidate
-    mongo.db.daily_duel.update_one({"_id": ObjectId(duel_id)}, {"$inc": {"votes." + selected_candidate_id: 1}})
-
-    # Mark the user as having voted in this duel
-    mongo.db.daily_duel.update_one({"_id": ObjectId(duel_id)}, {"$set": {"votes." + user_id: True}})
-
-    return jsonify({"status": "success"})
-
-# Route to determine the winner of the daily duel
-@app.route('/daily_duel_winner', methods=['GET'])
-def daily_duel_winner():
-    # Retrieve the current daily duel from the database
-    daily_duel = mongo.db.daily_duel.find_one()
-
-    if not daily_duel:
-        return jsonify({"status": "error", "message": "No daily duel currently active."}), 404
-
-    # Calculate the total votes for each candidate
-    candidate_1_votes = daily_duel['votes'].get(str(daily_duel['candidates'][0]['_id']), 0)
-    candidate_2_votes = daily_duel['votes'].get(str(daily_duel['candidates'][1]['_id']), 0)
-
-    # Determine the winner based on the number of votes
-    if candidate_1_votes > candidate_2_votes:
-        winner = daily_duel['candidates'][0]
-    elif candidate_2_votes > candidate_1_votes:
-        winner = daily_duel['candidates'][1]
-    else:
-        winner = None  # It's a tie
-
-    return jsonify({"status": "success", "winner": winner})
 
 
 def calculate_expected_outcome(rating_a, rating_b):
