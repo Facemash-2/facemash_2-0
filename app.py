@@ -115,7 +115,10 @@ def get_leaderboard():
     all_candidates = list(mongo.db.votes.find())
     
     # Sort candidates by their Elo scores in descending order
-    sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
+    sorted_candidates = sorted(all_candidates, key=lambda x: (x["score"], x["count"]), reverse=True)
+
+    # Move candidates with count 0 to the bottom of the leaderboard
+    sorted_candidates.sort(key=lambda x: x['count'] == 0)
 
     # Convert to JSON-compatible format
     return jsonify(convert_to_json_compatible(sorted_candidates))
