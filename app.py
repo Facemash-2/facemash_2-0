@@ -7,6 +7,7 @@ from math import pow
 from flask_cors import CORS
 from flask import request, redirect, url_for
 import os
+from flask import render_template
 
 
 app = Flask(__name__)
@@ -29,6 +30,17 @@ def calculate_expected_outcome(rating_a, rating_b):
     return 1 / (1 + pow(10, (rating_b - rating_a) / 400))
     
 
+
+@app.route('/results')
+def results():
+    # Retrieve the top 3 candidates from the leaderboard
+    top_candidates = mongo.db.votes.find().sort([("score", -1)]).limit(3)
+
+    # Render the results.html template with the top 3 candidates
+    return render_template('results.html', 
+                           top_candidate=top_candidates[0],
+                           second_candidate=top_candidates[1],
+                           third_candidate=top_candidates[2])
 
 @app.route('/admin')
 def admin():
