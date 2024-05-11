@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+efrom flask import Flask, render_template, request, jsonify
 from flask import session, redirect, url_for
 from flask_pymongo import PyMongo
 from bson import ObjectId
@@ -154,7 +154,7 @@ def vote():
         return jsonify({"status": "error", "message": "Internal server error"}), 500
 @app.route('/')
 def index():
-    return render_template('results.html')
+    return render_template('index.html')
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
