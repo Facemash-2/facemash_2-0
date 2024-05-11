@@ -1,4 +1,3 @@
-<!-- results.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,8 @@
             text-align: center;
             padding-top: 50px;
         }
-        .podium {e
+        .podium {
+            display: flex;
             justify-content: space-around;
             align-items: flex-end;
             margin-bottom: 20px;
@@ -21,6 +21,7 @@
         .podium .candidate {
             text-align: center;
             margin-bottom: 20px;
+            flex: 1; /* Equal width for all columns */
         }
         .candidate img {
             width: 200px;
@@ -28,37 +29,36 @@
             margin-bottom: 10px;
         }
         .medal {
-            font-size: 36px; /* Increased size for the medals */
+            font-size: 36px;
             margin-right: 5px;
         }
         .gold {
             color: #FFD700;
-            margin-bottom: 10px; /* Adjusted height for gold medal */
+            margin-bottom: 10px;
         }
         .silver {
             color: #C0C0C0;
-            margin-bottom: 20px; /* Adjusted height for silver medal */
+            margin-bottom: 20px;
         }
         .bronze {
             color: #CD7F32;
-            margin-bottom: 30px; /* Adjusted height for bronze medal */
+            margin-bottom: 30px;
         }
     </style>
 </head>
 <body>
     <h1>Results</h1>
     <div class="podium">
-        
-        <div class="candidate" style="margin-bottom: 50px;"> <!-- Adjusted height for silver medal candidate -->
+        <div class="candidate">
             <span class="medal silver">🥈</span>
             <br>
             <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
             <br>
             <span>{{ second_candidate.name }}</span>
             <br>
-            <span>Score: {{ second_candidate.score }}</span
+            <span>Score: {{ second_candidate.score }}</span>
         </div>
-        <div class="candidate" style="margin-bottom: 70px;"> <!-- Adjusted height for gold medal candidate -->
+        <div class="candidate">
             <span class="medal gold">🥇</span>
             <br>
             <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
@@ -67,7 +67,7 @@
             <br>
             <span>Score: {{ top_candidate.score }}</span>
         </div>
-        <div class="candidate" style="margin-bottom: 0px;"> <!-- Adjusted height for bronze medal candidate -->
+        <div class="candidate">
             <span class="medal bronze">🥉</span>
             <br>
             <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
@@ -77,11 +77,5 @@
             <span>Score: {{ third_candidate.score }}</span>
         </div>
     </div>
-    <script>
-    // Function to round a number to the nearest integer (remove decimal digits)
-    function round(number) {
-        return Math.round(number);
-    }
-    </script>
 </body>
 </html>
