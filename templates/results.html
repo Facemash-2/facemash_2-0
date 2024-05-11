@@ -56,7 +56,7 @@
     </div>
     <div class="podium">
         <div class="candidate">
-            <span class="medal silver">🥈</span>
+            <span class="medal silver" style="margin-bottom: 40px;">🥈</span>
             <br>
             <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
             <br>
@@ -65,7 +65,7 @@
             <span>Score: {{ second_candidate.score }}</span>
         </div>
         <div class="candidate">
-            <span class="medal gold">🥇</span>
+            <span class="medal gold" style="margin-bottom: 0px;">🥇</span>
             <br>
             <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
             <br>
@@ -74,7 +74,7 @@
             <span>Score: {{ top_candidate.score }}</span>
         </div>
         <div class="candidate">
-            <span class="medal bronze">🥉</span>
+            <span class="medal bronze" style="margin-bottom: 60px;">🥉</span>
             <br>
             <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
             <br>
