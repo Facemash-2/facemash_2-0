@@ -112,6 +112,9 @@ function voteFor(selected_id) {
                 const scoreCell= document.createElement('td')
                 const countCell= document.createElement('td')
                 countCell.innerText = item.count;
+                const likeabilityCell = document.createElement('td');
+                likeabilityCell.innerText = item.likeability_percentage.toFixed(2) + "%";
+                row.appendChild(likeabilityCell);
                 
 
                 positionCell.innerText = index + 1;  // Rank
@@ -132,7 +135,7 @@ function voteFor(selected_id) {
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
-                row.appendChild(countCell);
+                row.appendChild(likeabilityCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
@@ -177,7 +180,7 @@ function voteFor(selected_id) {
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Votes</th>
+                    <th>Likeability</th>
                 </tr>
             </thead>
             <tbody id="leaderboard">
