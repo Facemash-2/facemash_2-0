@@ -35,13 +35,13 @@ def calculate_expected_outcome(rating_a, rating_b):
 def results():
     try:
         # Retrieve the top 3 candidates from the leaderboard
-        top_candidates = mongo.db.votes.find().sort([("score", -1)]).limit(3)
+        top_candidates = list(mongo.db.votes.find().sort([("score", -1)]).limit(3))
 
         # Render the results.html template with the top 3 candidates
         return render_template('results.html', 
-                               top_candidate=top_candidate,
-                               second_candidate=second-candidate,
-                               third_candidate=third_candidate,
+                               top_candidate=top_candidates[0],
+                               second_candidate=top_candidates[1],
+                               third_candidate=top_candidates[2])
     except Exception as e:
         return f"An error occurred: {e}"
 
