@@ -49,7 +49,7 @@
 <body>
     <h1>Results</h1>
     <div class="podium">
-        <div class="candidate" style="margin-bottom: 0px;"> <!-- Adjusted height for gold medal candidate -->
+        <div class="candidate" style="margin-bottom: 70px;"> <!-- Adjusted height for gold medal candidate -->
             <span class="medal gold">🥇</span>
             <br>
             <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
@@ -58,7 +58,7 @@
             <br>
             <span>Score: {{ top_candidate.score }}</span>
         </div>
-        <div class="candidate" style="margin-bottom: 40px;"> <!-- Adjusted height for silver medal candidate -->
+        <div class="candidate" style="margin-bottom: 50px;"> <!-- Adjusted height for silver medal candidate -->
             <span class="medal silver">🥈</span>
             <br>
             <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
@@ -67,7 +67,7 @@
             <br>
             <span>Score: {{ second_candidate.score }}</span>
         </div>
-        <div class="candidate" style="margin-bottom: 60px;"> <!-- Adjusted height for bronze medal candidate -->
+        <div class="candidate" style="margin-bottom: 0px;"> <!-- Adjusted height for bronze medal candidate -->
             <span class="medal bronze">🥉</span>
             <br>
             <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
