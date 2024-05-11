@@ -16,3 +16,4 @@ flask_login
 random 
 celery
 datetime
+secure-smtplib
