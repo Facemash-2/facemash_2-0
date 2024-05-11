@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Results</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -21,6 +20,7 @@
         }
         .podium .candidate {
             text-align: center;
+            margin-bottom: 20px;
         }
         .candidate img {
             width: 200px;
@@ -28,41 +28,43 @@
             margin-bottom: 10px;
         }
         .medal {
-            font-size: 24px;
+            font-size: 36px; /* Increased size for the medals */
             margin-right: 5px;
         }
         .gold {
             color: #FFD700;
+            margin-bottom: 10px; /* Adjusted height for gold medal */
         }
         .silver {
             color: #C0C0C0;
+            margin-bottom: 20px; /* Adjusted height for silver medal */
         }
         .bronze {
             color: #CD7F32;
+            margin-bottom: 30px; /* Adjusted height for bronze medal */
         }
     </style>
 </head>
 <body>
     <h1>Results</h1>
     <div class="podium">
-        
-        <div class="candidate" style='padding-top:500px;'>
-            <span class="medal silver" >🥈</span>
-            <br>
-            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
-            <br>
-            <span>{{ second_candidate.name }}</span>
-            <br>
-            <span>Score: {{ second_candidate.score }}</span>
-        </div>
         <div class="candidate">
-            <span class="medal gold" style='padding-bottom:150px;'>🥇</span>
+            <span class="medal gold">🥇</span>
             <br>
             <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
             <br>
             <span>{{ top_candidate.name }}</span>
             <br>
             <span>Score: {{ top_candidate.score }}</span>
+        </div>
+        <div class="candidate">
+            <span class="medal silver">🥈</span>
+            <br>
+            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
+            <br>
+            <span>{{ second_candidate.name }}</span>
+            <br>
+            <span>Score: {{ second_candidate.score }}</span>
         </div>
         <div class="candidate">
             <span class="medal bronze">🥉</span>
