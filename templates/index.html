@@ -109,13 +109,10 @@ function voteFor(selected_id) {
 
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
-                const scoreCell= document.createElement('td')
-                const countCell= document.createElement('td')
+                const scoreCell = document.createElement('td');
+                const countCell = document.createElement('td');
                 countCell.innerText = item.count;
-                const likeabilityCell = document.createElement('td');
-                likeabilityCell.innerText = item.likeability_percentage.toFixed(2) + "%";
-                row.appendChild(likeabilityCell);
-                
+                row.appendChild(countCell);
 
                 positionCell.innerText = index + 1;  // Rank
                 nameCell.innerText = item.name;  // Candidate's name
@@ -135,7 +132,7 @@ function voteFor(selected_id) {
 
                 row.appendChild(positionCell);
                 row.appendChild(nameCell);
-                row.appendChild(likeabilityCell);
+                row.appendChild(countCell);
 
                 leaderboard.appendChild(row);  // Append to the leaderboard
             });
@@ -180,7 +177,7 @@ function voteFor(selected_id) {
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Likeability</th>
+                    <th>Votes</th>
                 </tr>
             </thead>
             <tbody id="leaderboard">
