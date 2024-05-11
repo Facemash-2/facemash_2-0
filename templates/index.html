@@ -109,8 +109,10 @@ function voteFor(selected_id) {
 
                 const positionCell = document.createElement('td');
                 const nameCell = document.createElement('td');
+                const scoreCell= document.createElement('td')
+                const countCell= document.createElement('td')
                 countCell.innerText = item.count;
-                row.appendChild(countCell);
+                
 
                 positionCell.innerText = index + 1;  // Rank
                 nameCell.innerText = item.name;  // Candidate's name
