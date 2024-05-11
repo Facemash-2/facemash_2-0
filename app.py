@@ -124,19 +124,12 @@ def index():
 def get_leaderboard():
     # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
+    
+    # Sort candidates by their Elo scores in descending order
+    sorted_candidates = sorted(all_candidates, key=lambda x: (x["score"], x["count"]), reverse=True)
 
-    # Calculate total votes
-    total_votes = sum(candidate['score'] for candidate in all_candidates)
-
-    # Calculate likeability percentage for each candidate
-    for candidate in all_candidates:
-        if total_votes != 0:
-            candidate['likeability_percentage'] = (candidate['score'] / total_votes) * 100
-        else:
-            candidate['likeability_percentage'] = 0  # Handle division by zero case
-
-    # Sort candidates by their likeability percentage in descending order
-    sorted_candidates = sorted(all_candidates, key=lambda x: x["likeability_percentage"], reverse=True)
+    # Move candidates with count 0 to the bottom of the leaderboard
+    sorted_candidates.sort(key=lambda x: x['count'] == 0)
 
     # Convert to JSON-compatible format
     return jsonify(convert_to_json_compatible(sorted_candidates))
