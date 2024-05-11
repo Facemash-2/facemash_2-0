@@ -113,11 +113,18 @@ def index():
 def get_leaderboard():
     # Retrieve all candidates from the database
     all_candidates = list(mongo.db.votes.find())
-    
+    # Calculate total votes
+    total_votes = sum(candidate['count'] for candidate in all_candidates)
+    # Calculate likeability percentage for each candidate
+    for candidate in all_candidates:
+        if total_votes != 0:
+            candidate['likeability_percentage'] = (candidate['count'] / total_votes) * 100
+        else:
+            candidate['likeability_percentage'] = 0  # Handle division by zero case
     # Sort candidates by their Elo scores in descending order
     sorted_candidates = sorted(all_candidates, key=lambda x: x["score"], reverse=True)
-
     # Convert to JSON-compatible format
+    return jsonify(convert_to_json_compatible(all_candidates))
     return jsonify(convert_to_json_compatible(sorted_candidates))
 
 @app.route('/get_votes', methods=['GET'])
