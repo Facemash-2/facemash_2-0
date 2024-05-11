@@ -44,6 +44,16 @@
 <body>
     <h1>Results</h1>
     <div class="podium">
+        
+        <div class="candidate">
+            <span class="medal silver" style='padding-top:100px;'>🥈</span>
+            <br>
+            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
+            <br>
+            <span>{{ second_candidate.name }}</span>
+            <br>
+            <span>Score: {{ second_candidate.score }}</span>
+        </div>
         <div class="candidate">
             <span class="medal gold">🥇</span>
             <br>
@@ -52,15 +62,6 @@
             <span>{{ top_candidate.name }}</span>
             <br>
             <span>Score: {{ top_candidate.score }}</span>
-        </div>
-        <div class="candidate">
-            <span class="medal silver">🥈</span>
-            <br>
-            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
-            <br>
-            <span>{{ second_candidate.name }}</span>
-            <br>
-            <span>Score: {{ second_candidate.score }}</span>
         </div>
         <div class="candidate">
             <span class="medal bronze">🥉</span>
