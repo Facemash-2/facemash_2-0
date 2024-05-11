@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Duel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Duel</h1>
+        <div class="vote-pair">
+            <div class="vote-section">
+                <img src="/static/images/{{ daily_duel.candidates[0].name|lower }}.jpg" 
+                    alt="{{ daily_duel.candidates[0].name }}" 
+                    class="person-image">
+                <h3>{{ daily_duel.candidates[0].name }}</h3>
+                <button onclick="vote('{{ daily_duel._id }}', '{{ daily_duel.candidates[0]._id }}')">Vote</button>
+            </div>
+            <img class="banner" src="/static/versus.png">
+            <div class="vote-section">
+                <img src="/static/images/{{ daily_duel.candidates[1].name|lower }}.jpg" 
+                    alt="{{ daily_duel.candidates[1].name }}" 
+                    class="person-image">
+                <h3>{{ daily_duel.candidates[1].name }}</h3>
+                <button onclick="vote('{{ daily_duel._id }}', '{{ daily_duel.candidates[1]._id }}')">Vote</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function vote(duelId, candidateId) {
+            // Check if the user has already voted
+            if (localStorage.getItem(duelId) === 'true') {
+                alert('You have already voted in this duel.');
+                return;
+            }
+
+            // Send a vote request to the server
+            fetch('/vote_daily_duel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    duel_id: duelId,
+                    selected_candidate_id: candidateId,
+                    user_id: duelId + '_' + candidateId  // Unique user ID for this duel
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Vote submitted successfully!');
+                    localStorage.setItem(duelId, 'true'); // Mark user as voted
+                    window.location.reload(); // Refresh the page to prevent multiple votes
+                } else {
+                    alert('Failed to submit vote. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your vote. Please try again later.');
+            });
+        }
+    </script>
+</body>
+</html>
