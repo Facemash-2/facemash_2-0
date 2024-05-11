@@ -14,61 +14,62 @@
         }
         .podium {
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
             align-items: flex-end;
             margin-bottom: 20px;
         }
         .podium .candidate {
-            margin: 0 10px;
-            flex: 1;
             text-align: center;
         }
         .candidate img {
-            width: 150px;
+            width: 200px;
             border-radius: 50%;
             margin-bottom: 10px;
-        }
-        .top-candidate {
-            color: #FFD700; /* Gold */
-        }
-        .second-candidate {
-            color: #C0C0C0; /* Silver */
-        }
-        .third-candidate {
-            color: #CD7F32; /* Bronze */
         }
         .medal {
             font-size: 24px;
             margin-right: 5px;
+        }
+        .gold {
+            color: #FFD700;
+        }
+        .silver {
+            color: #C0C0C0;
+        }
+        .bronze {
+            color: #CD7F32;
         }
     </style>
 </head>
 <body>
     <h1>Results</h1>
     <div class="podium">
-        <div class="candidate top-candidate">
-            <span class="medal">🏅</span>
+        <div class="candidate">
+            <span class="medal gold">🥇</span>
             <br>
-            <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
+            <img src="{{ top_candidate.image }}" alt="{{ top_candidate.name }}">
             <br>
             <span>{{ top_candidate.name }}</span>
             <br>
+            <span>Score: {{ top_candidate.score }}</span>
         </div>
-        <div class="candidate second-candidate">
-            <span class="medal">🥈</span>
+        <div class="candidate">
+            <span class="medal silver">🥈</span>
             <br>
-            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
+            <img src="{{ second_candidate.image }}" alt="{{ second_candidate.name }}">
             <br>
             <span>{{ second_candidate.name }}</span>
             <br>
+            <span>Score: {{ second_candidate.score }}</span>
         </div>
-        <div class="candidate third-candidate">
-            <span class="medal">🥉</span>
+        <div class="candidate">
+            <span class="medal bronze">🥉</span>
             <br>
-            <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
+            <img src="{{ third_candidate.image }}" alt="{{ third_candidate.name }}">
             <br>
             <span>{{ third_candidate.name }}</span>
             <br>
+            <span>Score: {{ third_candidate.score }}</span>
         </div>
     </div>
 </body>
