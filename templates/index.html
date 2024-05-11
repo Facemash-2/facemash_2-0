@@ -150,28 +150,102 @@ function voteFor(selected_id) {
             setInterval(updateVotes, 5000);  // Refresh the leaderboard every 5 seconds
         };
     </script>
+<script>
+        // Function to hide the loading animation once the page is loaded
+        window.addEventListener('load', function() {
+            var body = document.querySelector('body');
+            if (body) {
+                body.style.background = 'none'; // Remove the GIF background once the page is loaded
+                body.style.overflow = 'auto'; // Restore scrolling behavior
+            }
+        });
+    </script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .container1 {
+            max-width: 100%;  /* Use a percentage for flexibility */
+            margin: 0 auto;
+            text-align: center;
+            background-color: white;
+        }
+
+        .podium {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .podium .candidate {
+            text-align: center;
+            margin-bottom: 20px;
+            flex: 1; /* Equal width for all columns */
+        }
+        .candidate img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;  /* Maintain aspect ratio */
+            margin-bottom: 10px;  /* Spacing between image and button */
+            cursor: pointer;
+        }
+        .medal {
+            font-size: 36px;
+            margin-right: 5px;
+        }
+        .gold {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        .silver {
+            color: #C0C0C0;
+            margin-bottom: 20px;
+        }
+        .bronze {
+            color: #CD7F32;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
 <body>
+    
     <div class="container1">
-    <h1>Facemash 2.0</h1>
-    <div>
-    <div class="container">
-        
-        <p style='font-size: 30px;margin-block-start: 0;'>Who's Hotter? Click to choose.</p>
-
-        <!-- Section for displaying two candidates for voting -->
-        <div class="vote-pair">
-            <div id="left-person" class="vote-section">
-                <!-- Content is dynamically inserted here -->
-            </div>
-
-        
-            <img class="banner" src="/static/versus.png"></img>
-        
-
-            <div id="right-person" class="vote-section">
-                <!-- Content is dynamically inserted here -->
-            </div>
+    <h1>Results</h1>
+    </div>
+    <div class="podium">
+        <div class="candidate" style="margin-top: 40px;">
+            <span class="medal silver" >🥈</span>
+            <br>
+            <img src="/static/images/{{ second_candidate.name|lower }}.jpg" alt="{{ second_candidate.name }}">
+            <br>
+            <span>{{ second_candidate.name }}</span>
+            <br>
         </div>
+        <div class="candidate" style="margin-top: 0px;">
+            <span class="medal gold" >🥇</span>
+            <br>
+            <img src="/static/images/{{ top_candidate.name|lower }}.jpg" alt="{{ top_candidate.name }}">
+            <br>
+            <span>{{ top_candidate.name }}</span>
+            <br>
+        </div>
+        <div class="candidate" style="margin-top: 60px;">
+            <span class="medal bronze" >🥉</span>
+            <br>
+            <img src="/static/images/{{ third_candidate.name|lower }}.jpg" alt="{{ third_candidate.name }}">
+            <br>
+            <span>{{ third_candidate.name }}</span>
+            <br>
+        </div>
+   </div>
+    <div class="container1">
+    <p style='font-size: 30px;margin-block-start: 0;'>Congratulations to {{ top_candidate.name }}.</p>
+    <br>
+    <p style='font-size: 30px;margin-block-start: 0;'>The votings will be back soon follow our insta to know when it's back</p>
+    </div>
 
         <h2>Leaderboard</h2>
         <table class="leaderboard-table">
