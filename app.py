@@ -5,6 +5,9 @@ from bson import ObjectId
 import random
 from math import pow
 from flask_cors import CORS
+from flask import request, redirect, url_for
+import os
+
 
 app = Flask(__name__)
 CORS(app)
@@ -30,6 +33,21 @@ def calculate_expected_outcome(rating_a, rating_b):
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
+
+@app.route('/add_person', methods=['POST'])
+def add_person():
+    # Get the name and photo file from the form
+    name = request.form['name']
+    photo_file = request.files['photo']
+
+    # Save the photo to a folder (assuming 'static/images')
+    photo_filename = os.path.join(app.config['static/images'], photo_file.filename)
+    photo_file.save(photo_filename)
+
+    # Add the person to the database
+    mongo.db.votes.insert_one({"name": name, "count": 0, "score": 1000})
+
+    return redirect(url_for('admin'))
 
 
 def convert_to_json_compatible(data):
