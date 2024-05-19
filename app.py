@@ -31,7 +31,7 @@ def calculate_expected_outcome(rating_a, rating_b):
     
 
 
-@app.route('/disabled_will_be_back_soon')
+@app.route('/')
 def results():
     try:
         # Retrieve the top 3 candidates from the leaderboard
@@ -152,7 +152,7 @@ def vote():
     except Exception as e:
         app.logger.error(f"Error in /vote endpoint: {e}")
         return jsonify({"status": "error", "message": "Internal server error"}), 500
-@app.route('/')
+@app.route('/disabled_will_be_back_soon')
 def index():
     return render_template('index.html')
 
